@@ -32,10 +32,6 @@ function ReadStream(parentStream, opts) {
 }
 util.inherits(ReadStream, Stream);
 
-Object.prototype.getLength = function () {
-    return Object.keys(this).length;
-};
-
 function mergeBuffer(buffers) {
     var length = 0;
     for (var i = 0; i < buffers.length; ++i)

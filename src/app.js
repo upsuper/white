@@ -50,8 +50,7 @@ var bcNumber = 0,
 /* Socket handler */
 
 function handleSocket(socket) {
-    socket.removeAllListeners('list');
-    socket.emit('list', broadcasts.map(filterBroadcastInfo));
+    socket.emit('list', mapObject(broadcasts, filterBroadcastInfo));
 
     socket.once('create', function (opts) {
         bcNumber += 1;
@@ -81,22 +80,13 @@ function handleSocket(socket) {
 }
 
 function handleHost(socket, id, opts) {
-    // Check options
-    var width = opts.width,
-        height = opts.height;
-    if (typeof width != 'number' || width <= 0)
-        width = DEFAULT_WIDTH;
-    if (typeof height != 'number' || height <= 0)
-        height = DEFAULT_HEIGHT;
-
     // Initialize broadcast
     var broadcast = broadcasts[id] = {
         // Basic information
         title: opts.title,
         desc: opts.desc,
         time: new Date(),
-        width: width,
-        height: height,
+        ratio: opts.ratio,
         // Sockets
         host: socket,
         audience: {},
@@ -464,10 +454,9 @@ function filterBroadcastInfo(broadcast) {
     return {
         title: broadcast.title,
         desc: broadcast.desc,
-        width: broadcast.width,
-        height: broadcast.height,
+        ratio: broadcast.ratio,
         time: broadcast.time,
-        audience: broadcast.audience.length
+        audience: broadcast.audience.keys().length
     };
 }
 
@@ -483,15 +472,10 @@ function randomString() {
     return Math.random().toString(36).substring(2);
 }
 
-/* Object prototype */
-
-Object.prototype.map = function (func) {
+function mapObject(obj, func) {
     var ret = {};
-    for (var k in this)
-        ret[k] = func(this[k]);
+    for (var k in obj)
+        if (obj.hasOwnProperty(k))
+            ret[k] = func(obj[k]);
     return ret;
-};
-
-Object.prototype.size = function () {
-    return Object.keys(this).length;
-};
+}
