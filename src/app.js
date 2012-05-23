@@ -95,9 +95,8 @@ function handleHost(socket, id, opts) {
         // Status
         mode: 'white',
         canvas: {
-            graphics: {0: []},
-            history: {0: []},
-            current: 0,
+            graphics: [],
+            history: [],
             drawing: null,
         },
         video: {
@@ -180,9 +179,9 @@ function handleHost(socket, id, opts) {
         var drawing = canvas.drawing;
         if (drawing && drawing.type === 'path') {
             drawing.points.push({x: x, y: y});
-            canvas.graphics[canvas.current].push(drawing);
+            canvas.graphics.push(drawing);
             canvas.drawing = null;
-            canvas.history[canvas.current] = [];
+            canvas.history = [];
             return true;
         }
         return false;
@@ -197,34 +196,25 @@ function handleHost(socket, id, opts) {
         return true;
     });
     socket.onEvent('draw undo', function () {
-        if (canvas.graphics[canvas.current].length > 0) {
-            canvas.history[canvas.current].push(
-                canvas.graphics[canvas.current].pop());
+        if (canvas.graphics.length > 0) {
+            canvas.history.push(canvas.graphics.pop());
             return true;
         }
         return false;
     });
     socket.onEvent('draw redo', function () {
-        if (canvas.history[canvas.current].length > 0) {
-            canvas.graphics[canvas.current].push(
-                canvas.history[canvas.current].pop());
+        if (canvas.history.length > 0) {
+            canvas.graphics.push(canvas.history.pop());
             return true;
         }
         return false;
     });
 
     // White mode
-    socket.onEvent('mode white', function (canvasId) {
+    socket.onEvent('mode white', function () {
         broadcast.mode = 'white';
-        canvas.current = canvasId;
-        return true;
-    });
-    socket.onEvent('white switch', function (canvasId) {
-        if (typeof canvas.graphics[canvasId] === 'undefined') {
-            canvas.graphics[canvasId] = [];
-            canvas.history[canvasId] = [];
-        }
-        canvas.current = canvasId;
+        canvas.graphics = [];
+        canvas.history = [];
         return true;
     });
 
@@ -300,17 +290,16 @@ function handleHost(socket, id, opts) {
 
         // clean canvas
         broadcast.mode = 'slide';
-        canvas.current = 'slide';
-        canvas.graphics.slide = [];
-        canvas.history.slide = [];
+        canvas.graphics = [];
+        canvas.history = [];
         
         return true;
     });
     socket.onEvent('slide step', function (step, pagechanged) {
         slide.step = step;
         if (pagechanged) {
-            canvas.graphics.slide = [];
-            canvas.history.slide = [];
+            canvas.graphics = [];
+            canvas.history = [];
         }
         return true;
     });
