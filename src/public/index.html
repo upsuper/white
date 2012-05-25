@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White</title>
+    <link rel="stylesheet" href="/css/bootstrap.css"> <!-- TODO: use .min -->
+    <link rel="stylesheet" href="/css/style.css">
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.js"></script> <!-- TODO: use .min -->
+    <script type="text/javascript" src="/js/start.js"></script>
+    <script type="text/javascript" src="/js/host.js"></script>
+    <script type="text/javascript" src="/js/audience.js"></script>
+</head>
+<body>
+    <div id="start">
+        <ul id="bclist">
+            <li><a href="#create_new" title="Create New Broadcast" class="btn btn-large btn-primary" data-toggle="modal">New Broadcast...</a></li>
+        </ul>
+    </div>
+    <div id="create_new" class="modal hide">
+        <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h2>Create New Broadcast</h2>
+        </div>
+        <div class="modal-body form-horizontal">
+            <fieldset>
+                <div class="control-group">
+                    <label for="new_title" class="control-label">Title</label>
+                    <div class="controls">
+                        <input id="new_title" type="text" required>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="new_id" class="control-label">ID</label>
+                    <div class="controls">
+                        <input id="new_id" type="text">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="new_ratio" class="control-label">Aspect Ratio</label>
+                    <div class="controls">
+                        <select id="new_ratio">
+                            <option value="4:3">4:3</option>
+                            <option value="16:10">16:10</option>
+                            <option value="16:9">16:9</option>
+                            <option value="3:2">3:2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="new_desc" class="control-label">Description</label>
+                    <div class="controls">
+                        <textarea id="new_desc"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="modal-footer">
+            <button id="btn_create" class="btn btn-primary">Create</button>
+            <button class="btn" data-dismiss="modal">Cancel</button>
+        </div>
+    </div>
+    <toolbar id="mode_switcher">
+        <button id="mode_white">White</button>
+        <button id="mode_video">Video</button>
+        <button id="mode_slide">Slide</button>
+    </toolbar>
+    <toolbar id="slide_tools">
+        <button id="enable_drawing">Drawing</button>
+        <button id="slide_prev">Prev</button>
+        <button id="slide_next">Next</button>
+    </toolbar>
+    <toolbar id="drawing_tools">
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+        <button id="pencil">Pencil</button>
+        <button id="eraser">Eraser</button>
+        <button id="highlighter">Highlighter</button>
+        <button id="clear">Clear</button>
+    </toolbar>
+    <div id="canvas">
+        <canvas id="drawing"></canvas>
+        <canvas id="graphics"></canvas>
+    </div>
+    <video id="video"></video>
+    <iframe id="slide"></iframe>
+</body>
+</html>

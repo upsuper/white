@@ -1,0 +1,27 @@
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    list-style: none;
+}
+
+#canvas, #video, #slide,
+toolbar {
+    display: none;
+}
+
+#bclist {
+    margin: 50px auto;
+    width: 200px;
+}
+
+#bclist .btn {
+    box-sizing: border-box;
+    width: 200px;
+}
+
+#drawing, #graphics, #video, #slide {
+    position: absolute;
+}
