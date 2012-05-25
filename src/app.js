@@ -292,6 +292,7 @@ function handleHost(socket, id, opts) {
         broadcast.mode = 'slide';
         canvas.graphics = [];
         canvas.history = [];
+        canvas.drawing = null;
         
         return true;
     });
@@ -300,6 +301,7 @@ function handleHost(socket, id, opts) {
         if (pagechanged) {
             canvas.graphics = [];
             canvas.history = [];
+            canvas.drawing = null;
         }
         return true;
     });
@@ -340,6 +342,7 @@ function handleAudience(socket, audId, id) {
     
     socket.emit('initialize', (function() {
         var video = broadcast.video;
+        var slide = broadcast.slide;
         var data = {
             mode: broadcast.mode,
             canvas: broadcast.canvas,
@@ -349,7 +352,10 @@ function handleAudience(socket, audId, id) {
                 position: video.position + 
                     (video.status === 'playing' ? now() - video.lastupdate : 0)
             },
-            slide: broadcast.slide
+            slide: {
+                slideid: slide.slideid,
+                step: slide.step
+            }
         };
         return data;
     })());
