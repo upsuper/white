@@ -111,7 +111,7 @@ function initAudience(socket, broadcast_id, ratio) {
 
         ctx.save();
         ctx.lineCap = 'round';
-        ctx.lineWidth = graph.width;
+        ctx.lineWidth = graph.width * width;
         ctx.strokeStyle = graph.color;
 
         ctx.beginPath();
