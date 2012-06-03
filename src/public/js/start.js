@@ -1,6 +1,6 @@
 $(function () {
     var $bclist = $('#bclist');
-    var socket = io.connect('http://localhost');
+    var socket = io.connect();
     socket.on('list', function (bcinfo) {
         $('>.broadcast', $bclist).remove();
         for (var k in bcinfo) {
@@ -17,7 +17,7 @@ $(function () {
                                  .attr('data-ratio', bc.ratio)
                                  .addClass('btn btn-large')
                          )
-                     .appendTo($bclist);
+                     .prependTo($bclist);
         }
     });
 
@@ -27,7 +27,7 @@ $(function () {
         if (t.tagName !== 'A')
             return;
         e.preventDefault();
-        if (!$(t).hasClass('broadcast'))
+        if (!t.dataset.id)
             return;
         // hide start
         $('#start').hide();

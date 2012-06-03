@@ -7,6 +7,21 @@ li {
     list-style: none;
 }
 
+canvas, iframe {
+    border: 0 none;
+    background: white;
+}
+
+.slide>canvas {
+    background: transparent;
+}
+
+#drawing, #graphics, #video, #slide {
+    position: absolute;
+}
+
+/* Start */
+
 #canvas, #video, #slide,
 toolbar {
     display: none;
@@ -17,11 +32,53 @@ toolbar {
     width: 200px;
 }
 
+#bclist>li {
+    margin: 10px 0;
+}
+
 #bclist .btn {
     box-sizing: border-box;
     width: 200px;
 }
 
-#drawing, #graphics, #video, #slide {
-    position: absolute;
+/* Host */
+
+body.host {
+    background: #cccccc;
 }
+
+body.horizontal>toolbar {
+}
+
+body.vertical>toolbar {
+}
+
+body.host>#graphics {
+    box-shadow: 2px 2px 8px;
+}
+
+toolbar>button {
+    position: absolute;
+    border: 0 none;
+    background-color: transparent;
+    background-size: auto 100%;
+    background-image: url(../img/buttons.png);
+    text-indent: -10000px;
+}
+toolbar>button.current, toolbar>button:hover {
+    background-image: url(../img/buttons_cur.png);
+}
+#enable_drawing { background-position: -0% 0px; }
+#pencil         { background-position: -100% 0px; }
+#eraser         { background-position: -200% 0px; }
+#highlighter    { background-position: -300% 0px; }
+#undo           { background-position: -400% 0px; }
+#redo           { background-position: -500% 0px; }
+#clear          { background-position: -600% 0px; }
+#thickness      { background-position: -700% 0px; }
+#color          { background-position: -800% 0px; }
+#mode_white     { background-position: -900% 0px; }
+#mode_video     { background-position: -1000% 0px; }
+#mode_slide     { background-position: -1100% 0px; }
+
+/* Audience */

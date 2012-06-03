@@ -1,29 +1,15 @@
-var CACHE_DIR = '/cache';
-
 function initAudience(socket, broadcast_id, ratio) {
-    var mode, canvas, video, slide;
     var cacheDir = CACHE_DIR + '/' + broadcast_id;
 
-    var width, height;
+    // size
     ratio = ratio.split(':');
     ratio = parseInt(ratio[0]) / parseInt(ratio[1]);
 
-    var $$canvas = $('#canvas'),
-        $$drawing = $('#drawing'),
-        $$graphics = $('#graphics'),
-        $$video = $('#video'),
-        $$slide = $('#slide');
-    var $canvas = $$canvas[0],
-        $drawing = $$drawing[0],
-        $graphics = $$graphics[0],
-        $video = $$video[0],
-        $slide = $$slide[0];
-    var ctxGraphics = $graphics.getContext('2d'),
-        ctxDrawing = $drawing.getContext('2d');
-    var slideControl;
+    initElements();
 
     // initialize audience
     socket.once('initialize', function (data) {
+        console.log(data);
         mode = data.mode;
         canvas = data.canvas;
         video = data.video;
@@ -53,6 +39,8 @@ function initAudience(socket, broadcast_id, ratio) {
 
     // on window resize event
     window.onresize = function () {
+        if (!canvas)
+            return;
         // get current size
         width = window.innerWidth;
         height = window.innerHeight;
@@ -64,15 +52,15 @@ function initAudience(socket, broadcast_id, ratio) {
         // compute size
         var curRatio = width / height;
         if (curRatio > ratio)
-            width *= ratio / curRatio;
+            width = height * ratio;
         else if (curRatio < ratio)
-            height *= curRatio / ratio;
+            height = width / ratio;
         // resize canvases and slide
         function setPos(e) {
             e.width = width;
             e.height = height;
-            e.style.left = (window.innerWidth - width) / 2;
-            e.style.top = (window.innerHeight - height) / 2;
+            e.style.left = (window.innerWidth - width) / 2 + 'px';
+            e.style.top = (window.innerHeight - height) / 2 + 'px';
         }
         setPos($drawing);
         setPos($graphics);
@@ -82,47 +70,6 @@ function initAudience(socket, broadcast_id, ratio) {
         redrawGraphics();
         redrawDrawing();
     };
-
-    // drawing functions
-    function redrawGraphics() {
-        var ctx = ctxGraphics;
-        ctx.clearRect(0, 0, width, height);
-        ctx.save();
-        ctx.globalCompositeOperation = 'destination-over';
-        for (var i = canvas.graphics.length - 1; i >= 0; --i) {
-            var graph = canvas.graphics[i];
-            if (graph.type === 'clear')
-                break;
-            else if (graph.type === 'path')
-                drawPath(ctx, graph);
-        }
-        ctx.restore();
-    }
-    function redrawDrawing() {
-        ctxDrawing.clearRect(0, 0, width, height);
-        if (!canvas.drawing)
-            return;
-        drawPath(ctxDrawing, canvas.drawing);
-    }
-    function drawPath(ctx, graph) {
-        var path = graph.points;
-        if (path.length <= 1)
-            return;
-
-        ctx.save();
-        ctx.lineCap = 'round';
-        ctx.lineWidth = graph.width * width;
-        ctx.strokeStyle = graph.color;
-
-        ctx.beginPath();
-        ctx.moveTo(path[0].x * width, path[0].y * height);
-        // TODO using bezier smooth
-        for (var i = 1; i < path.length; ++i)
-            ctx.lineTo(path[i].x * width, path[i].y * height);
-        ctx.stroke();
-
-        ctx.restore();
-    }
 
     // other mode change
     function initVideo() {
@@ -186,7 +133,7 @@ function initAudience(socket, broadcast_id, ratio) {
             redrawGraphics();
         }
     });
-    socket.onEvent('draw redo', function () {
+    socket.on('draw redo', function () {
         if (canvas.history.length > 0) {
             var graph = canvas.history.pop();
             canvas.graphics.push(graph);

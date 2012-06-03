@@ -309,6 +309,7 @@ function handleHost(socket, id, opts) {
     // Disconnect
     socket.on('disconnect', function () {
         delete broadcast.host;
+        console.log('broadcast ' + id + ' finished');
         broadcastEvents('host disconnected');
         delete broadcasts[id];
     });
@@ -316,14 +317,15 @@ function handleHost(socket, id, opts) {
     // Audience change
     broadcast.addAudience = function (audId, audSocket) {
         broadcast.audience[audId] = audSocket;
-        socket.emit('audience changed', broadcast.audience.keys());
+        socket.emit('audience changed', Object.keys(broadcast.audience));
     };
     broadcast.removeAudience = function (audId) {
         delete broadcast.audience[audId];
-        socket.emit('audience changed', broadcast.audience.keys());
+        socket.emit('audience changed', Object.keys(broadcast.audience));
     };
 
     // Broadcast ready
+    console.log('broadcast ' + id + ' ready');
     socket.emit('ready', id);
 }
 
@@ -338,8 +340,10 @@ function handleAudience(socket, audId, id) {
     socket.on('disconnect', function () {
         if (broadcast.host)
             broadcast.removeAudience(audId);
+        console.log('audience ' + audId + ' left ' + id);
     });
     
+    console.log('audience ' + audId + ' joined ' + id);
     socket.emit('initialize', (function() {
         var video = broadcast.video;
         var slide = broadcast.slide;
@@ -451,7 +455,7 @@ function filterBroadcastInfo(broadcast) {
         desc: broadcast.desc,
         ratio: broadcast.ratio,
         time: broadcast.time,
-        audience: broadcast.audience.keys().length
+        audience: Object.keys(broadcast.audience).length
     };
 }
 

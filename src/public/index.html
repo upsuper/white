@@ -10,6 +10,7 @@
     <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="/js/bootstrap.js"></script> <!-- TODO: use .min -->
     <script type="text/javascript" src="/js/start.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
     <script type="text/javascript" src="/js/host.js"></script>
     <script type="text/javascript" src="/js/audience.js"></script>
 </head>
@@ -62,23 +63,23 @@
             <button class="btn" data-dismiss="modal">Cancel</button>
         </div>
     </div>
+    <toolbar id="drawing_tools">
+        <button id="enable_drawing">Drawing</button>
+        <button id="pencil">Pencil</button>
+        <button id="eraser">Eraser</button>
+        <button id="highlighter">Highlighter</button>
+        <button id="undo">Undo</button>
+        <button id="redo">Redo</button>
+        <button id="clear">Clear</button>
+    </toolbar>
+    <toolbar id="brush_styler">
+        <button id="thickness">Thickness</button>
+        <button id="color">Color</button>
+    </toolbar>
     <toolbar id="mode_switcher">
         <button id="mode_white">White</button>
         <button id="mode_video">Video</button>
         <button id="mode_slide">Slide</button>
-    </toolbar>
-    <toolbar id="slide_tools">
-        <button id="enable_drawing">Drawing</button>
-        <button id="slide_prev">Prev</button>
-        <button id="slide_next">Next</button>
-    </toolbar>
-    <toolbar id="drawing_tools">
-        <button id="undo">Undo</button>
-        <button id="redo">Redo</button>
-        <button id="pencil">Pencil</button>
-        <button id="eraser">Eraser</button>
-        <button id="highlighter">Highlighter</button>
-        <button id="clear">Clear</button>
     </toolbar>
     <div id="canvas">
         <canvas id="drawing"></canvas>
