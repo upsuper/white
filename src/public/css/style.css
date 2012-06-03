@@ -12,18 +12,18 @@ canvas, iframe {
     background: white;
 }
 
-.slide>canvas {
+.slide>canvas, #drawing {
     background: transparent;
 }
 
-#drawing, #graphics, #video, #slide {
+#drawing, #graphics, #video, #slide, palette, chooser {
     position: absolute;
 }
 
 /* Start */
 
 #canvas, #video, #slide,
-toolbar {
+toolbar, palette, chooser {
     display: none;
 }
 

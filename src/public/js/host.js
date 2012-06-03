@@ -18,15 +18,30 @@ function initHost(socket, opts) {
         slides: {}
     };
 
+    var PENCIL_COLORS = [
+            '#000000', '#ff0000', '#22b14c',
+            '#80ffff', '#ff7f27', '#0000ff',
+            '#919091', '#ffff00', '#a349a4'
+        ],
+        HIGHLIGHTER_COLORS = [
+            'rgba(254, 254, 129, .2)', 'rgba(92, 250, 152, .2)', 
+            'rgba(59, 232, 244, .2)', 'rgba(254, 170, 249, .2)'
+        ],
+        THICKNESSES = [
+            0.007, 0.009, 0.012, 0.015, 0.02
+        ];
+
     // elements;
     var $$body = $('body');
     var $$buttons = $('toolbar>button'),
         $$toolbars = $('toolbar');
+    var $$palette = $('palette'),
+        $$chooser = $('chooser');
     initElements();
 
     // size
     var canvasSpacing = 10,
-        maxButtonSize = 64,
+        maxButtonSize = 80,
         buttonSpacing = 0.6;
     // ratio
     var cWidth, cHeight; // width & height of canvas
@@ -40,6 +55,7 @@ function initHost(socket, opts) {
         buttonSize;
 
     // on window resize event
+    var offsetX, offsetY;
     window.onresize = function () {
         var top, bottom, left, right;
         top = bottom = left = right = canvasSpacing;
@@ -112,32 +128,192 @@ function initHost(socket, opts) {
         else if (curRatio < ratio)
             height = width / ratio;
         // resize canvases, video and slide
+        offsetX = left+ (origWidth - left - right - width) / 2;
+        offsetY = top + (origHeight - top - bottom - height) / 2;
         function setPos(e) {
             e.width = width;
             e.height = height;
-            e.style.left = left +
-                (origWidth - left - right - width) / 2 + 'px';
-            e.style.top = top +
-                (origHeight - top - bottom - height) / 2 + 'px';
+            e.style.left = offsetX + 'px';
+            e.style.top = offsetY + 'px';
         }
         setPos($drawing);
         setPos($graphics);
         setPos($video);
         setPos($slide);
     
+        // initial chooser
+        // TODO
+        for (var i = 0; i < THICKNESSES.length; ++i) {
+            var $thickness = $('<thickness>')[0];
+            $thickness.dataset.thick = THICKNESSES[i];
+        }
+
         // redraw
         redrawGraphics();
         redrawDrawing();
     };
     window.onresize();
 
+    var tool, color, thickness;
     var brushStyle = {};
 
-    $('#pencil').click(function () {
-        // set current
+    /* Tools */
+    
+    function setCurrentTool(elem) {
         $('#drawing_tools>button').removeClass('current');
-        $(this).addClass('current');
+        $(elem).addClass('current');
+    }
+
+    $('#pencil').click(function () {
+        if (tool === 'pencil')
+            return;
+        // set current
+        setCurrentTool(this);
+        tool = 'pencil';
+        // init palette & show chooser
+        $('#color').show();
+        $$palette.attr('class', '');
+        $$palette.addClass('pencil-color');
+        for (var i = 0; i < PENCIL_COLORS.length; ++i) {
+            var $color = $('<color>')[0];
+            $color.dataset.color = PENCIL_COLORS[i];
+            $color.style.backgroundColor = PENCIL_COLORS[i];
+            $$palette.append($color);
+        }
+        $('#thickness').show();
+        // set brush style
+        brushStyle.color = color = PENCIL_COLORS[0];
+        brushStyle.thickness = thickness = THICKNESSES[0];
     });
+
+    $('#eraser').click(function () {
+        if (tool == 'eraser')
+            return;
+        // set current
+        setCurrentTool(this);
+        tool = 'eraser';
+        // hide color & init chooser
+        $('#color').hide();
+        $('#thickness').show();
+        // set brush style
+        brushStyle.color = '#ffffff';
+        brushStyle.thickness = thickness =
+            THICKNESSES[THICKNESSES.length - 1];
+    });
+
+    $('#highlighter').click(function () {
+        if (tool == 'highlighter')
+            return;
+        // set current
+        setCurrentTool(this);
+        tool = 'highlighter';
+        // init palette & show chooser
+        $('#color').show();
+        $$palette.attr('class', '');
+        $$palette.addClass('highlighter-color');
+        for (var i = 0; i < HIGHLIGHTER_COLORS.length; ++i) {
+            var $color = $('<color>')[0];
+            $color.dataset.color = HIGHLIGHTER_COLORS[i];
+            $color.style.backgroundColor = HIGHLIGHTER_COLORS[i];
+            $$palette.append($color);
+        }
+        $('#thickness').show();
+        // set brush style
+        brushStyle.color = color = HIGHLIGHTER_COLORS[0];
+        brushStyle.thickness = thickness = 
+            THICKNESSES[THICKNESSES.length - 1];
+    });
+
+    // TODO disable of undo & redo
+    $('#undo').click(function () {
+        if (canvas.graphics.length > 0) {
+            canvas.history.push(canvas.graphics.pop());
+            redrawGraphics();
+            socket.emit('draw undo');
+        }
+    });
+
+    $('#redo').click(function () {
+        if (canvas.history.length > 0) {
+            var graph = canvas.history.pop();
+            canvas.graphics.push(graph);
+            drawPath(ctxGraphics, graph);
+            socket.emit('draw redo');
+        }
+    });
+
+    $('#clear').click(function () {
+        canvas.graphics.push({type: 'clear'});
+        canvas.history = [];
+        redrawGraphics();
+        socket.emit('draw clear');
+    });
+
+    /* Drawing */
+
+    function getPoint(e) {
+        var x, y;
+        if (e.touches) {
+            x = e.touches[0].clientX;
+            y = e.touches[0].clientY;
+        }
+        else {
+            x = e.clientX;
+            y = e.clientY;
+        }
+        x -= offsetX; x /= width;
+        y -= offsetY; y /= height;
+        return {x: x, y: y};
+    }
+
+    function startDrawing(e) {
+        e.preventDefault();
+        var p = getPoint(e);
+        canvas.drawing = {
+            type: 'path',
+            color: brushStyle.color,
+            width: brushStyle.thickness,
+            points: [p]
+        };
+        socket.emit('draw path', p.x, p.y,
+                brushStyle.color, brushStyle.thickness);
+    }
+
+    function drawing(e) {
+        e.preventDefault();
+        var drawing = canvas.drawing;
+        if (!drawing || drawing.type !== 'path')
+            return;
+        var p = getPoint(e);
+        drawing.points.push(p);
+        socket.emit('draw path add', p.x, p.y);
+        redrawDrawing();
+    }
+
+    function endDrawing(e) {
+        e.preventDefault();
+        var drawing = canvas.drawing;
+        if (!drawing || drawing.type !== 'path')
+            return;
+        if (!e.touches)
+            drawing.points.push(getPoint(e));
+
+        var length = drawing.points.length;
+        var lastPoint = drawing.points[length - 1];
+        canvas.graphics.push(drawing);
+        canvas.history = [];
+        drawPath(ctxGraphics, drawing);
+        socket.emit('draw path end', lastPoint.x, lastPoint.y);
+        canvas.drawing = null;
+        redrawDrawing();
+    }
+
+    $drawing.addEventListener('mousedown', startDrawing);
+    $drawing.addEventListener('mousemove', drawing);
+    $drawing.addEventListener('mouseup', endDrawing);
+    $drawing.addEventListener('touchstart', startDrawing);
+    $drawing.addEventListener('touchmove', drawing);
+    $drawing.addEventListener('touchend', endDrawing);
 
     /* Mode switchers */
 
@@ -171,6 +347,8 @@ function initHost(socket, opts) {
         // default tool
         $('#pencil').click();
     });
+    
+    /* Main process */
 
     $$body.addClass('host');
 

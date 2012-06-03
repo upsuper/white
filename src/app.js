@@ -1,7 +1,7 @@
 /* Constants */
 
 var HTTP_PORT = 8080;
-var TIME_BASE = (new Date(2012, 4, 1)).getTime();
+var TIME_BASE = (new Date()).getTime();
 var DEFAULT_WIDTH = 1024,
     DEFAULT_HEIGHT = 768;
 var PUBLIC_DIR = __dirname + '/public',
@@ -125,12 +125,12 @@ function handleHost(socket, id, opts) {
 
     // Broadcast
     function broadcastEvents(evt, args) {
-        // Clone args
-        args = Array.isArray(args) ? args.slice(0) : [];
+        // convert args to array
+        args = args ? Array.prototype.slice.call(args) : [];
         args.unshift(evt);
         var audience = broadcast.audience;
         for (var audId in audience)
-            audience[audId].emit.applt(audience, args);
+            audience[audId].emit.apply(audience[audId], args);
     }
     socket.onEvent = function (evt, func) {
         socket.on(evt, function () {
@@ -286,7 +286,7 @@ function handleHost(socket, id, opts) {
         if (slide.slideid)
             slides[slideid] = slide.step;
         slide.slideid = slideid;
-        slide.step = slides[slideid];
+        slide.step = null;
 
         // clean canvas
         broadcast.mode = 'slide';

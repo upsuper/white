@@ -105,7 +105,7 @@ function initAudience(socket, broadcast_id, ratio) {
     });
     socket.on('draw path add', function (x, y) {
         var drawing = canvas.drawing;
-        if (drawing && drawing.type !== 'path') {
+        if (drawing && drawing.type === 'path') {
             drawing.points.push({x: x, y: y});
             // redraw
             redrawDrawing();

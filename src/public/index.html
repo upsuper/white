@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>White</title>
     <link rel="stylesheet" href="/css/bootstrap.css"> <!-- TODO: use .min -->
     <link rel="stylesheet" href="/css/style.css">
@@ -81,11 +81,13 @@
         <button id="mode_video">Video</button>
         <button id="mode_slide">Slide</button>
     </toolbar>
-    <div id="canvas">
-        <canvas id="drawing"></canvas>
-        <canvas id="graphics"></canvas>
-    </div>
-    <video id="video"></video>
     <iframe id="slide"></iframe>
+    <video id="video"></video>
+    <div id="canvas">
+        <canvas id="graphics"></canvas>
+        <canvas id="drawing"></canvas>
+    </div>
+    <palette></palette>
+    <chooser></chooser>
 </body>
 </html>
