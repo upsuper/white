@@ -121,7 +121,27 @@ function handleHost(socket, id, opts) {
 
     // Create cache directory
     var cacheDir = CACHE_DIR + '/' + id;
-    mkdirp(cacheDir);
+    mkdirp(cacheDir, function (err) {
+        console.log(err);
+        fs.readdir(cacheDir, function (err, files_) {
+            console.log(err, files_);
+            var existsFiles = {};
+            for (var i = 0; i < files_.length; ++i) {
+                var filename = files_[i],
+                    fileId = timeString() + '-' + filename,
+                    newLoc = cacheDir + '/file-' + fileId;
+                if (filename.charAt(0) === '.')
+                    continue;
+                existsFiles[fileId] = files[fileId] = {
+                    filename: filename,
+                    finished: true,
+                    location: newLoc
+                };
+                fs.symlink(cacheDir + '/' + filename, newLoc);
+            }
+            socket.emit('files found', existsFiles);
+        });
+    });
 
     // Broadcast
     function broadcastEvents(evt, args) {
@@ -311,6 +331,25 @@ function handleHost(socket, id, opts) {
         delete broadcast.host;
         console.log('broadcast ' + id + ' finished');
         broadcastEvents('host disconnected');
+
+        // clean up cache files
+        var ids = Object.keys(files);
+        for (var i = 0; i < ids.length; ++i) {
+            var fileId = ids[i],
+                file = files[fileId];
+            if (!file.finished)
+                continue;
+            fs.unlink(file.location);
+        }
+        // clean up extracted slides
+        ids = Object.keys(slides);
+        for (var i = 0; i < ids.length; ++i) {
+            var slideId = ids[i];
+            // TODO
+        }
+        // try to delete cache dir
+        fs.rmdir(cacheDir);
+
         delete broadcasts[id];
     });
 

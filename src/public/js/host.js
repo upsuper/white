@@ -357,5 +357,12 @@ function initHost(socket, opts) {
         $$toolbars.show();
         $('#mode_white').click();
     });
+    socket.on('files found', function (files_) {
+        var ids = Object.keys(files_);
+        for (var i = 0; i < ids.length; ++i) {
+            var fileId = ids[i];
+            files[fileId] = files_[fileId];
+        }
+    });
     socket.emit('create', opts);
 }
