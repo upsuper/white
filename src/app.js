@@ -14,6 +14,7 @@ var fs = require('fs'),
     url = require('url'),
     http = require('http'),
     path = require('path'),
+    crypto = require('crypto'),
     mkdirp = require('mkdirp'),
     express = require('express'),
     connect = require('connect'),
@@ -122,16 +123,17 @@ function handleHost(socket, id, opts) {
     // Create cache directory
     var cacheDir = CACHE_DIR + '/' + id;
     mkdirp(cacheDir, function (err) {
-        console.log(err);
         fs.readdir(cacheDir, function (err, files_) {
-            console.log(err, files_);
             var existsFiles = {};
             for (var i = 0; i < files_.length; ++i) {
                 var filename = files_[i],
-                    fileId = timeString() + '-' + filename,
-                    newLoc = cacheDir + '/file-' + fileId;
+                    extname = path.extname(filename),
+                    fileId = timeString() + '-' + md5(filename);
                 if (filename.charAt(0) === '.')
                     continue;
+                if (/^\.\w+$/.test(extname))
+                    fileId += extname;
+                var newLoc = cacheDir + '/file-' + fileId;
                 existsFiles[fileId] = files[fileId] = {
                     filename: filename,
                     finished: true,
@@ -165,7 +167,10 @@ function handleHost(socket, id, opts) {
     // File upload
     socket.onEvent('file', function (filename) {
         filename = path.basename(filename);
-        var fileId = timeString();
+        var fileId = timeString() + '-' + md5(filename),
+            extname = path.extname(filename);
+        if (/^\.\w+$/.test(extname))
+            fileId += extname;
         var secret = randomString();
         files[fileId] = {
             filename: filename,
@@ -516,4 +521,8 @@ function mapObject(obj, func) {
         if (obj.hasOwnProperty(k))
             ret[k] = func(obj[k]);
     return ret;
+}
+
+function md5(data) {
+    return crypto.createHash('md5').update(data).digest('hex');
 }
