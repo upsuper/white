@@ -137,7 +137,10 @@ function initAudience(socket, broadcast_id, ratio) {
         if (canvas.history.length > 0) {
             var graph = canvas.history.pop();
             canvas.graphics.push(graph);
-            drawPath(ctxGraphics, graph);
+            if (graph.type === 'path')
+                drawPath(ctxGraphics, graph);
+            else if (graph.type === 'clear')
+                redrawGraphics();
         }
     });
 

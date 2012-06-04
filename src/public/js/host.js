@@ -21,10 +21,10 @@ function initHost(socket, opts) {
     var PENCIL_COLORS = [
             '#ff0000', '#22b14c', '#80ffff',
             '#ff7f27', '#0000ff', '#919091',
-            '#ffff00', '#a349a4', '#00000'
+            '#ffff00', '#a349a4', '#000000'
         ],
         HIGHLIGHTER_COLORS = [
-            'rgba(254, 254, 129, .2)', 'rgba(92, 250, 152, .2)', 
+            'rgba(254, 254, 129, .4)', 'rgba(92, 250, 152, .2)', 
             'rgba(59, 232, 244, .2)', 'rgba(254, 170, 249, .2)'
         ],
         THICKNESSES = [
@@ -54,8 +54,8 @@ function initHost(socket, opts) {
         maxButtonSize = 80,
         buttonSpacing = 0.6,
         refWidth = 1000;
+    var origWidth, origHeight;
     // ratio
-    var cWidth, cHeight; // width & height of canvas
     ratio = ratio.split(':');
     ratio = parseInt(ratio[0]) / parseInt(ratio[1]);
     // toolbar size
@@ -78,8 +78,8 @@ function initHost(socket, opts) {
         var top, bottom, left, right;
         top = bottom = left = right = canvasSpacing;
         // get current size
-        var origWidth = window.innerWidth,
-            origHeight = window.innerHeight;
+        origWidth = window.innerWidth;
+        origHeight = window.innerHeight;
         width = origWidth;
         height = origHeight;
         if (width == 0 || height == 0)
@@ -291,16 +291,17 @@ function initHost(socket, opts) {
     /* Palette */
 
     function relocPalette() {
-        var palScale = width / refWidth;
+        var scale = width / refWidth;
         if ($$body.hasClass('horizontal')) {
             $palette.style.left = buttonSize + 'px';
             $palette.style.top = $('#color').offset().top +
-                buttonSize / 2 - $$palette.height() * palScale / 2 + 'px';
+                buttonSize / 2 - $$palette.height() * scale / 2 + 'px';
         }
         else {
-            $palette.style.top = origHeight - buttonSize + 'px';
+            $palette.style.top = origHeight - buttonSize -
+                $$palette.height() * scale + 'px';
             $palette.style.left = $('#color').offset().left +
-                buttonSize / 2 - $$palette.width() * palScale / 2 + 'px';
+                buttonSize / 2 - $$palette.width() * scale / 2 + 'px';
         }
     }
     $('#color').click(function (e) {
@@ -336,7 +337,7 @@ function initHost(socket, opts) {
             $chooser.style.top = origHeight - buttonSize -
                 $$chooser.height() * scale + 'px';
             $chooser.style.left = $('#thickness').offset().left +
-                buttonSize / 2 - $$chooser.width() * palScale / 2 + 'px';
+                buttonSize / 2 - $$chooser.width() * scale / 2 + 'px';
         }
     }
     for (var i = 0; i < THICKNESSES.length; ++i) {

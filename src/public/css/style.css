@@ -71,6 +71,7 @@ toolbar>button.current, toolbar>button:hover {
 toolbar>button[disabled] {
     opacity: .4;
     background-image: url(../img/buttons.png);
+    cursor: default;
 }
 #enable_drawing { background-position: -0% 0px; }
 #pencil         { background-position: -100% 0px; }
