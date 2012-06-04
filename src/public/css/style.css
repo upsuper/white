@@ -53,7 +53,7 @@ body.horizontal>toolbar {
 body.vertical>toolbar {
 }
 
-body.host>#graphics {
+body.host #graphics {
     box-shadow: 2px 2px 8px;
 }
 
@@ -68,6 +68,10 @@ toolbar>button {
 toolbar>button.current, toolbar>button:hover {
     background-image: url(../img/buttons_cur.png);
 }
+toolbar>button[disabled] {
+    opacity: .4;
+    background-image: url(../img/buttons.png);
+}
 #enable_drawing { background-position: -0% 0px; }
 #pencil         { background-position: -100% 0px; }
 #eraser         { background-position: -200% 0px; }
@@ -80,5 +84,51 @@ toolbar>button.current, toolbar>button:hover {
 #mode_white     { background-position: -900% 0px; }
 #mode_video     { background-position: -1000% 0px; }
 #mode_slide     { background-position: -1100% 0px; }
+
+#color {
+    position: relative;
+}
+#color_show {
+    width: 48%; height: 34%;
+    position: absolute;
+    top: 25%; left: 16%;
+    border-radius: 50%;
+    -webkit-transform: rotate(20deg);
+    -moz-transform: rotate(20deg);
+    -o-transform: rotate(20deg);
+    transform: rotate(20deg);
+}
+
+palette {
+    -webkit-transform-origin: left top;
+    -moz-transform-origin: left top;
+    -o-transform-origin: left top;
+    transform-origin: left top;
+}
+
+palette.pencil-color {
+    width: 168px;
+}
+
+palette.highlighter-color {
+    width: 112px;
+}
+
+color {
+    width: 44px;
+    height: 32px;
+    border-radius: 50%;
+    -webkit-transform: rotate(25deg);
+    -moz-transform: rotate(25deg);
+    -o-transform: rotate(25deg);
+    transform: rotate(25deg);
+    box-shadow: 3px 1px 2px;
+    float: left;
+    margin: 5px;
+}
+
+color:hover, color.current {
+    box-shadow: 0 0 5px 2px #ffff00;
+}
 
 /* Audience */

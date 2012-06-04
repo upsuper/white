@@ -19,9 +19,9 @@ function initHost(socket, opts) {
     };
 
     var PENCIL_COLORS = [
-            '#000000', '#ff0000', '#22b14c',
-            '#80ffff', '#ff7f27', '#0000ff',
-            '#919091', '#ffff00', '#a349a4'
+            '#ff0000', '#22b14c', '#80ffff',
+            '#ff7f27', '#0000ff', '#919091',
+            '#ffff00', '#a349a4', '#00000'
         ],
         HIGHLIGHTER_COLORS = [
             'rgba(254, 254, 129, .2)', 'rgba(92, 250, 152, .2)', 
@@ -34,9 +34,19 @@ function initHost(socket, opts) {
     // elements;
     var $$body = $('body');
     var $$buttons = $('toolbar>button'),
-        $$toolbars = $('toolbar');
-    var $$palette = $('palette'),
+        $$toolbars = $('toolbar'),
+        $$undo = $('#undo'),
+        $$redo = $('#redo'),
+        $$clear = $('#clear'),
+        $$colorShow = $('#color_show'),
+        $$palette = $('palette'),
         $$chooser = $('chooser');
+    var $palette = $$palette[0],
+        $chooser = $$chooser[0],
+        $undo = $$undo[0],
+        $redo = $$redo[0],
+        $clear = $$clear[0],
+        $colorShow = $$colorShow[0];
     initElements();
 
     // size
@@ -141,6 +151,14 @@ function initHost(socket, opts) {
         setPos($video);
         setPos($slide);
     
+        // set palette
+        var palTransform = 'scale(' + (width / 1000) + ')';
+        $$palette.css('-webkit-transform', palTransform);
+        $$palette.css('-moz-transform', palTransform);
+        $$palette.css('-o-transform', palTransform);
+        $$palette.css('transform', palTransform);
+        relocPalette();
+
         // initial chooser
         // TODO
         for (var i = 0; i < THICKNESSES.length; ++i) {
@@ -172,8 +190,8 @@ function initHost(socket, opts) {
         tool = 'pencil';
         // init palette & show chooser
         $('#color').show();
-        $$palette.attr('class', '');
-        $$palette.addClass('pencil-color');
+        $$palette.empty().attr('class', '')
+                 .addClass('pencil-color');
         for (var i = 0; i < PENCIL_COLORS.length; ++i) {
             var $color = $('<color>')[0];
             $color.dataset.color = PENCIL_COLORS[i];
@@ -182,7 +200,7 @@ function initHost(socket, opts) {
         }
         $('#thickness').show();
         // set brush style
-        brushStyle.color = color = PENCIL_COLORS[0];
+        $('color').eq(0).click();
         brushStyle.thickness = thickness = THICKNESSES[0];
     });
 
@@ -209,8 +227,8 @@ function initHost(socket, opts) {
         tool = 'highlighter';
         // init palette & show chooser
         $('#color').show();
-        $$palette.attr('class', '');
-        $$palette.addClass('highlighter-color');
+        $$palette.empty().attr('class', '')
+                 .addClass('highlighter-color');
         for (var i = 0; i < HIGHLIGHTER_COLORS.length; ++i) {
             var $color = $('<color>')[0];
             $color.dataset.color = HIGHLIGHTER_COLORS[i];
@@ -219,25 +237,45 @@ function initHost(socket, opts) {
         }
         $('#thickness').show();
         // set brush style
-        brushStyle.color = color = HIGHLIGHTER_COLORS[0];
+        $('color').eq(0).click();
         brushStyle.thickness = thickness = 
             THICKNESSES[THICKNESSES.length - 1];
     });
 
-    // TODO disable of undo & redo
     $('#undo').click(function () {
-        if (canvas.graphics.length > 0) {
-            canvas.history.push(canvas.graphics.pop());
+        var graphics = canvas.graphics;
+        if (graphics.length > 0) {
+            var graph = graphics.pop();
+            canvas.history.push(graph);
+            $redo.disabled = false;
+            if (graphics.length == 0) {
+                $undo.disabled = true;
+                $clear.disabled = true;
+            }
+            else if (graphics[graphics.length - 1].type === 'clear') {
+                $clear.disabled = true;
+            }
+            else if (graph.type === 'clear') {
+                $clear.disabled = false;
+            }
             redrawGraphics();
             socket.emit('draw undo');
         }
     });
 
     $('#redo').click(function () {
-        if (canvas.history.length > 0) {
-            var graph = canvas.history.pop();
+        var history = canvas.history;
+        if (history.length > 0) {
+            var graph = history.pop();
             canvas.graphics.push(graph);
-            drawPath(ctxGraphics, graph);
+            $undo.disabled = false;
+            if (history.length == 0)
+                $redo.disabled = true;
+            $clear.disabled = graph.type === 'clear';
+            if (graph.type === 'path')
+                drawPath(ctxGraphics, graph);
+            else if (graph.type === 'clear')
+                redrawGraphics();
             socket.emit('draw redo');
         }
     });
@@ -245,8 +283,47 @@ function initHost(socket, opts) {
     $('#clear').click(function () {
         canvas.graphics.push({type: 'clear'});
         canvas.history = [];
+        $undo.disabled = false;
+        $redo.disabled = true;
+        $clear.disabled = true;
         redrawGraphics();
         socket.emit('draw clear');
+    });
+
+    /* Palette */
+
+    function relocPalette() {
+        var palScale = width / 1000;
+        if ($$body.hasClass('horizontal')) {
+            $palette.style.left = buttonSize + 'px';
+            $palette.style.top = $('#color').offset().top +
+                buttonSize / 2 - $$palette.height() * palScale / 2 + 'px';
+        }
+        else {
+            $palette.style.top = origHeight - buttonSize + 'px';
+            $palette.style.left = $('#color').offset().left +
+                buttonSize / 2 - $$palette.width() * palScale / 2 + 'px';
+        }
+    }
+    $('#color').click(function (e) {
+        e.stopPropagation();
+        if ($$palette.is(':visible')) {
+            $$palette.hide();
+        }
+        else {
+            relocPalette();
+            $$palette.show();
+        }
+    });
+    $$palette.click(function (e) {
+        brushStyle.color = color = e.target.dataset.color;
+        $colorShow.style.backgroundColor = color;
+        $('color').removeClass('current');
+        $(e.target).addClass('current');
+    });
+
+    $(document).click(function (e) {
+        $$palette.hide();
     });
 
     /* Drawing */
@@ -302,6 +379,9 @@ function initHost(socket, opts) {
         var lastPoint = drawing.points[length - 1];
         canvas.graphics.push(drawing);
         canvas.history = [];
+        $undo.disabled = false;
+        $redo.disabled = true;
+        $clear.disabled = false;
         drawPath(ctxGraphics, drawing);
         socket.emit('draw path end', lastPoint.x, lastPoint.y);
         canvas.drawing = null;
@@ -335,6 +415,9 @@ function initHost(socket, opts) {
             this.disabled = false;
         });
         $('#enable_drawing').hide();
+        $undo.disabled = true;
+        $redo.disabled = true;
+        $clear.disabled = true;
 
         // change mode
         mode = 'white';

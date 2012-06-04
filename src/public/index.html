@@ -65,21 +65,21 @@
     </div>
     <toolbar id="drawing_tools">
         <button id="enable_drawing">Drawing</button>
-        <button id="pencil">Pencil</button>
-        <button id="eraser">Eraser</button>
-        <button id="highlighter">Highlighter</button>
-        <button id="undo">Undo</button>
-        <button id="redo">Redo</button>
-        <button id="clear">Clear</button>
+        <button id="pencil" title="Pencil">Pencil</button>
+        <button id="eraser" title="Eraser">Eraser</button>
+        <button id="highlighter" title="Highlighter">Highlighter</button>
+        <button id="undo" title="Undo" disabled>Undo</button>
+        <button id="redo" title="Redo" disabled>Redo</button>
+        <button id="clear" title="Clear" disabled>Clear</button>
     </toolbar>
     <toolbar id="brush_styler">
-        <button id="thickness">Thickness</button>
-        <button id="color">Color</button>
+        <button id="thickness" title="Thickness">Thickness</button>
+        <button id="color" title="Color">Color<div id="color_show"></div></button>
     </toolbar>
     <toolbar id="mode_switcher">
-        <button id="mode_white">White</button>
-        <button id="mode_video">Video</button>
-        <button id="mode_slide">Slide</button>
+        <button id="mode_white" title="White Mode">White</button>
+        <button id="mode_video" title="Video Mode">Video</button>
+        <button id="mode_slide" title="Slide Mode">Slide</button>
     </toolbar>
     <iframe id="slide"></iframe>
     <video id="video"></video>
