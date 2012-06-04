@@ -52,7 +52,8 @@ function initHost(socket, opts) {
     // size
     var canvasSpacing = 10,
         maxButtonSize = 80,
-        buttonSpacing = 0.6;
+        buttonSpacing = 0.6,
+        refWidth = 1000;
     // ratio
     var cWidth, cHeight; // width & height of canvas
     ratio = ratio.split(':');
@@ -63,6 +64,13 @@ function initHost(socket, opts) {
         buttonSizeBase = 1 / (buttonCount +
                 (toolbarCount - 1) * buttonSpacing),
         buttonSize;
+
+    function setTransform($$elem, transform) {
+        $$elem.css('-webkit-transform', transform);
+        $$elem.css('-moz-transform', transform);
+        $$elem.css('-o-transform', transform);
+        $$elem.css('transform', transform);
+    }
 
     // on window resize event
     var offsetX, offsetY;
@@ -151,20 +159,12 @@ function initHost(socket, opts) {
         setPos($video);
         setPos($slide);
     
-        // set palette
-        var palTransform = 'scale(' + (width / 1000) + ')';
-        $$palette.css('-webkit-transform', palTransform);
-        $$palette.css('-moz-transform', palTransform);
-        $$palette.css('-o-transform', palTransform);
-        $$palette.css('transform', palTransform);
+        // set palette & chooser
+        var widthScale = 'scale(' + (width / refWidth) + ')';
+        setTransform($$palette, widthScale);
         relocPalette();
-
-        // initial chooser
-        // TODO
-        for (var i = 0; i < THICKNESSES.length; ++i) {
-            var $thickness = $('<thickness>')[0];
-            $thickness.dataset.thick = THICKNESSES[i];
-        }
+        setTransform($$chooser, widthScale);
+        relocChooser();
 
         // redraw
         redrawGraphics();
@@ -201,7 +201,7 @@ function initHost(socket, opts) {
         $('#thickness').show();
         // set brush style
         $('color').eq(0).click();
-        brushStyle.thickness = thickness = THICKNESSES[0];
+        $('thickness').eq(0).click();
     });
 
     $('#eraser').click(function () {
@@ -215,8 +215,7 @@ function initHost(socket, opts) {
         $('#thickness').show();
         // set brush style
         brushStyle.color = '#ffffff';
-        brushStyle.thickness = thickness =
-            THICKNESSES[THICKNESSES.length - 1];
+        $('thickness').eq(-1).click();
     });
 
     $('#highlighter').click(function () {
@@ -238,8 +237,7 @@ function initHost(socket, opts) {
         $('#thickness').show();
         // set brush style
         $('color').eq(0).click();
-        brushStyle.thickness = thickness = 
-            THICKNESSES[THICKNESSES.length - 1];
+        $('thickness').eq(-1).click();
     });
 
     $('#undo').click(function () {
@@ -293,7 +291,7 @@ function initHost(socket, opts) {
     /* Palette */
 
     function relocPalette() {
-        var palScale = width / 1000;
+        var palScale = width / refWidth;
         if ($$body.hasClass('horizontal')) {
             $palette.style.left = buttonSize + 'px';
             $palette.style.top = $('#color').offset().top +
@@ -307,6 +305,7 @@ function initHost(socket, opts) {
     }
     $('#color').click(function (e) {
         e.stopPropagation();
+        $$chooser.hide();
         if ($$palette.is(':visible')) {
             $$palette.hide();
         }
@@ -316,14 +315,63 @@ function initHost(socket, opts) {
         }
     });
     $$palette.click(function (e) {
+        if (e.target.tagName !== 'COLOR')
+            return;
         brushStyle.color = color = e.target.dataset.color;
         $colorShow.style.backgroundColor = color;
         $('color').removeClass('current');
         $(e.target).addClass('current');
     });
 
+    /* Thickness */
+    
+    function relocChooser() {
+        var scale = width / refWidth;
+        if ($$body.hasClass('horizontal')) {
+            $chooser.style.left = buttonSize + 'px';
+            $chooser.style.top = $('#thickness').offset().top + buttonSize -
+                $$chooser.height() * scale + 'px';
+        }
+        else {
+            $chooser.style.top = origHeight - buttonSize -
+                $$chooser.height() * scale + 'px';
+            $chooser.style.left = $('#thickness').offset().left +
+                buttonSize / 2 - $$chooser.width() * palScale / 2 + 'px';
+        }
+    }
+    for (var i = 0; i < THICKNESSES.length; ++i) {
+        var $$thickness = $('<thickness>');
+        $$thickness[0].dataset.thick = THICKNESSES[i];
+        var thick = THICKNESSES[i] * refWidth;
+        $$thickness.append(
+                $('<div>').width(thick).height(thick)
+                          .css('margin-left', -thick / 2 + 'px')
+                          .css('margin-top', -thick / 2 + 'px')
+                );
+        $$chooser.append($$thickness);
+    }
+    $('#thickness').click(function (e) {
+        e.stopPropagation();
+        $$palette.hide();
+        if ($$chooser.is(':visible')) {
+            $$chooser.hide();
+        }
+        else {
+            relocChooser();
+            $$chooser.show();
+        }
+    });
+    $$chooser.click(function (e) {
+        if (e.target.tagName !== 'THICKNESS')
+            return;
+        brushStyle.thickness = thickness = e.target.dataset.thick;
+        $('thickness').removeClass('current');
+        $(e.target).addClass('current');
+    });
+
     $(document).click(function (e) {
         $$palette.hide();
+        $$chooser.hide();
     });
 
     /* Drawing */

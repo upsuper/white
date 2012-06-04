@@ -125,10 +125,43 @@ color {
     box-shadow: 3px 1px 2px;
     float: left;
     margin: 5px;
+    cursor: pointer;
 }
 
 color:hover, color.current {
     box-shadow: 0 0 5px 2px #ffff00;
+}
+
+chooser {
+    width: 56px;
+    -webkit-transform-origin: top left;
+    -moz-transform-origin: top left;
+    -o-transform-origin: top left;
+    transform-origin: top left;
+}
+
+thickness {
+    width: 54px; height: 34px;
+    border: 1px solid #f5f5f5;
+    display: block;
+    padding: 0;
+    box-shadow: 2px 2px 2px 0px #555;
+    position: relative;
+    float: left;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+thickness.current, thickness:hover {
+    box-shadow: 2px 2px 2px 0px #555, inset 0 0 8px #fcbf54;
+}
+
+thickness>div {
+    border-radius: 50%;
+    background-color: #000;
+    position: absolute;
+    top: 50%; left: 50%;
+    pointer-events: none;
 }
 
 /* Audience */
