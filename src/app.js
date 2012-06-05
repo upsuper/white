@@ -14,6 +14,7 @@ var fs = require('fs'),
     url = require('url'),
     http = require('http'),
     path = require('path'),
+    events = require('events'),
     crypto = require('crypto'),
     mkdirp = require('mkdirp'),
     express = require('express'),
@@ -176,7 +177,8 @@ function handleHost(socket, id, opts) {
             filename: filename,
             secret: secret,
             finished: false,
-            location: cacheDir + '/file-' + fileId
+            location: cacheDir + '/file-' + fileId,
+            startEvent: new events.EventEmitter
         };
         socket.emit('file ready', fileId, secret);
         return false;
@@ -416,7 +418,8 @@ function uploadFile(req, res) {
     var broadcast = broadcasts[req.params.id];
     if (!broadcast)
         return res.send(404);
-    var fileInfo = broadcast.files[req.params.fileid];
+    var fileId = req.params.fileid,
+        fileInfo = broadcast.files[fileId];
     if (!fileInfo)
         return res.send(404);
     var secret = req.headers[HEADER_PREFIX + 'secret'];
@@ -428,6 +431,8 @@ function uploadFile(req, res) {
     // Create stream cache
     var partFile = fileInfo.location + '.part';
     fileInfo.length = req.headers['content-length'];
+    if (fileInfo.length === undefined)
+        return res.send(411);
     var stream = fileInfo.stream = new StreamCache(req, partFile);
     stream.on('finish', function () {
         fs.rename(partFile, fileInfo.location, function () {
@@ -435,6 +440,11 @@ function uploadFile(req, res) {
             delete fileInfo.stream;
         });
     });
+
+    // notify others uploading started
+    fileInfo.startEvent.emit('started');
+    broadcast.host.emit('upload start', fileId);
+    delete fileInfo.startEvent;
 }
 
 function downloadFile(req, res) {
@@ -449,6 +459,11 @@ function downloadFile(req, res) {
     // Start downloading
     if (fileInfo.finished) {
         res.download(fileInfo.location, fileInfo.filename);
+    }
+    else if (fileInfo.length === undefined) {
+        fileInfo.startEvent.on('started', function () {
+            downloadFile(req, res);
+        });
     }
     else {
         var length = fileInfo.length;
@@ -485,7 +500,7 @@ function downloadFile(req, res) {
         
         // Send file
         res.setHeader('Content-Length', length);
-        var stream = s.cache.createNewStream(opts);
+        var stream = s.stream.createNewStream(opts);
         req.on('close', function () { stream.destroy(); });
         stream.pipe(res);
     }
