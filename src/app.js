@@ -79,6 +79,10 @@ function handleSocket(socket) {
         // Remove other listeners
         socket.removeAllListeners('create');
     });
+
+    socket.on('debug', function (info) {
+        console.log('debug', info);
+    });
 }
 
 function handleHost(socket, id, opts) {
@@ -128,6 +132,7 @@ function handleHost(socket, id, opts) {
             var existsFiles = {};
             for (var i = 0; i < files_.length; ++i) {
                 var filename = files_[i],
+                    fileLoc = cacheDir + '/' + filename,
                     extname = path.extname(filename),
                     fileId = timeString() + '-' + md5(filename);
                 if (filename.charAt(0) === '.')
@@ -138,9 +143,10 @@ function handleHost(socket, id, opts) {
                 existsFiles[fileId] = files[fileId] = {
                     filename: filename,
                     finished: true,
+                    length: fs.statSync(fileLoc).size,
                     location: newLoc
                 };
-                fs.symlink(cacheDir + '/' + filename, newLoc);
+                fs.symlink(fileLoc, newLoc);
             }
             socket.emit('files found', existsFiles);
         });
@@ -150,6 +156,7 @@ function handleHost(socket, id, opts) {
     function broadcastEvents(evt, args) {
         // convert args to array
         args = args ? Array.prototype.slice.call(args) : [];
+        console.log(evt, args);
         args.unshift(evt);
         var audience = broadcast.audience;
         for (var audId in audience)

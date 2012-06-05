@@ -1,5 +1,5 @@
-function initAudience(socket, broadcast_id, ratio) {
-    var cacheDir = CACHE_DIR + '/' + broadcast_id;
+function initAudience(socket, id, ratio) {
+    var cacheDir = CACHE_DIR + '/' + id;
 
     // size
     ratio = ratio.split(':');
@@ -73,15 +73,19 @@ function initAudience(socket, broadcast_id, ratio) {
 
     // other mode change
     function initVideo() {
-        $$video.empty();
-        $('<source>').attr('src', cacheDir + '/file-' + video.fileid)
+        cleanVideo();
+        function finishInit() {
+            $video.currentTime = video.position;
+            if (video.status === 'playing')
+                $video.play();
+            else
+                $video.pause();
+            $video.removeEventListener(finishInit);
+        }
+        $video.addEventListener('loadedmetadata', finishInit);
+        $('<source>').attr('src', getFilePath(id, video.fileid))
                      .attr('type', 'video/mp4') // XXX support more type
                      .appendTo($video);
-        $video.currentTime = video.position;
-        if (video.status === 'playing')
-            $video.play();
-        else
-            $video.pause();
     }
     function initSlide() {
         $slide.src = cacheDir + '/slide-' + slide.slideid + '/';
@@ -146,7 +150,7 @@ function initAudience(socket, broadcast_id, ratio) {
 
     // White mode
     socket.on('mode white', function () {
-        broadcast.mode = 'white';
+        mode = 'white';
         // clean
         canvas.graphics = [];
         canvas.history = [];
@@ -154,17 +158,21 @@ function initAudience(socket, broadcast_id, ratio) {
         redrawDrawing();
         // display
         $$canvas.show();
-        $$video.hide();
-        $$slide.hide();
+        cleanVideo();
+        cleanSlide();
     });
 
     // Video mode
     socket.on('mode video', function (fileid) {
-        broadcast.mode = 'video';
+        mode = 'video';
         video.fileid = fileid;
         video.status = 'paused';
         video.position = 0;
         initVideo();
+        // display
+        $$video.show();
+        cleanWhite();
+        cleanSlide();
     });
     socket.on('video play', function (pos) {
         video.status = 'playing';
@@ -187,7 +195,15 @@ function initAudience(socket, broadcast_id, ratio) {
         }
     });
     socket.on('video seek', function (pos) {
-        $video.currentTime = video.position = pos;
+        if ($video.readyState >= 1) {
+            $video.currentTime = video.position = pos;
+        }
+        else {
+            $$video.on('loadedmetadata', function () {
+                $video.currentTime = video.position = pos;
+                $$video.off('loadedmetadata');
+            });
+        }
     });
 
     // Slide mode
@@ -197,12 +213,16 @@ function initAudience(socket, broadcast_id, ratio) {
         initSlide();
 
         // clean canvas
-        broadcast.mode = 'slide';
+        mode = 'slide';
         canvas.graphics = [];
         canvas.history = [];
         canvas.drawing = null;
         redrawGraphics();
         redrawDrawing();
+        // display
+        $$canvas.show();
+        $$slide.show();
+        cleanVideo();
     });
     socket.on('slide step', function (step, pagechanged) {
         slide.step = step;
@@ -223,5 +243,5 @@ function initAudience(socket, broadcast_id, ratio) {
     });
 
     // start joining
-    socket.emit('join', broadcast_id);
+    socket.emit('join', id);
 }

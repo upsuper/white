@@ -67,3 +67,24 @@ function drawPath(ctx, graph) {
 
     ctx.restore();
 }
+
+function humanReadablizeSize(size) {
+    if (size < 1024)
+        return size + ' B';
+    if (size < 1024 * 1024)
+        return Math.round(size / 1024).toFixed(2) + ' KB';
+    if (size < 1024 * 1024 * 1024)
+        return Math.round(size / 1024 / 1024).toFixed(2) + ' MB';
+    return Math.round(size / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+}
+
+function getFilePath(id, fileId) {
+    return '/file/' + id + '/' + fileId;
+}
+
+function cleanWhite() { $$canvas.hide(); }
+function cleanVideo() {
+    $$video.hide().empty()
+           .attr('src', '').removeAttr('src');
+}
+function cleanSlide() { $$slide.hide().attr('src', 'about:blank'); }

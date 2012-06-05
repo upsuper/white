@@ -82,10 +82,27 @@
         <button id="mode_slide" title="Slide Mode">Slide</button>
     </toolbar>
     <iframe id="slide"></iframe>
-    <video id="video"></video>
+    <video id="video" preload="auto"></video>
     <div id="canvas">
         <canvas id="graphics"></canvas>
         <canvas id="drawing"></canvas>
+    </div>
+    <div id="choose_file" class="modal hide">
+        <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h2>Choose A File</h2>
+        </div>
+        <div class="modal-body">
+            <ul id="filelist"></ul>
+            <div id="nofiles" class="placeholder">
+                There is no appropriate file, please upload one.
+            </div>
+        </div>
+        <div class="modal-footer">
+            <input type="file" id="file" multiple>
+            <button id="btn_upload" class="btn btn-primary">Upload New File</button>
+            <button class="btn" data-dismiss="modal">Cancel</button>
+        </div>
     </div>
     <palette></palette>
     <chooser></chooser>

@@ -12,6 +12,10 @@ canvas, iframe {
     background: white;
 }
 
+video {
+    background-color: #000000;
+}
+
 .slide>canvas, #drawing {
     background: transparent;
 }
@@ -98,6 +102,51 @@ toolbar>button[disabled] {
     -moz-transform: rotate(20deg);
     -o-transform: rotate(20deg);
     transform: rotate(20deg);
+}
+
+#choose_file>.modal-body {
+    padding: 0;
+}
+
+#filelist>li {
+    padding: 15px;
+    border-bottom: 1px solid #eeeeee;
+    cursor: pointer;
+}
+
+#filelist>li:hover {
+    background: #f5f5f5;
+}
+
+#filelist>li:last-child {
+    border-bottom: 0 none;
+}
+
+#filelist>li>filesize {
+    float: right;
+    color: #999999;
+}
+
+#filelist>li>.progress {
+    margin: 5px 0 0;
+}
+
+#filelist>li[disabled] {
+    cursor: default;
+    opacity: .4;
+    pointer-events: none;
+}
+
+#nofiles {
+    color: #999999;
+    padding: 15px;
+    line-height: 120%;
+    font-size: 120%;
+    text-align: center;
+}
+
+#file {
+    display: none;
 }
 
 palette {

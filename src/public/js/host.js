@@ -29,6 +29,9 @@ function initHost(socket, opts) {
         ],
         THICKNESSES = [
             0.007, 0.009, 0.012, 0.015, 0.02
+        ],
+        SUPPORT_VIDEO = [
+            '.mp4'
         ];
 
     // elements;
@@ -39,14 +42,19 @@ function initHost(socket, opts) {
         $$redo = $('#redo'),
         $$clear = $('#clear'),
         $$colorShow = $('#color_show'),
+        $$filelist = $('#filelist'),
+        $$nofiles = $('#nofiles'),
+        $$file = $('#file'),
         $$palette = $('palette'),
-        $$chooser = $('chooser');
+        $$chooser = $('chooser'),
+        $$document = $(document);
     var $palette = $$palette[0],
         $chooser = $$chooser[0],
         $undo = $$undo[0],
         $redo = $$redo[0],
         $clear = $$clear[0],
-        $colorShow = $$colorShow[0];
+        $colorShow = $$colorShow[0],
+        $file = $$file[0];
     initElements();
 
     // size
@@ -306,12 +314,12 @@ function initHost(socket, opts) {
     }
     $('#color').click(function (e) {
         e.stopPropagation();
-        $$chooser.hide();
         if ($$palette.is(':visible')) {
             $$palette.hide();
         }
         else {
             relocPalette();
+            $$document.click();
             $$palette.show();
         }
     });
@@ -353,12 +361,12 @@ function initHost(socket, opts) {
     }
     $('#thickness').click(function (e) {
         e.stopPropagation();
-        $$palette.hide();
         if ($$chooser.is(':visible')) {
             $$chooser.hide();
         }
         else {
             relocChooser();
+            $$document.click();
             $$chooser.show();
         }
     });
@@ -395,6 +403,8 @@ function initHost(socket, opts) {
     function startDrawing(e) {
         e.preventDefault();
         var p = getPoint(e);
+        if (typeof e.button === 'number' && e.button !== 0)
+            return;
         canvas.drawing = {
             type: 'path',
             color: brushStyle.color,
@@ -444,6 +454,84 @@ function initHost(socket, opts) {
     $drawing.addEventListener('touchmove', drawing);
     $drawing.addEventListener('touchend', endDrawing);
 
+    /* Video */
+
+    $video.addEventListener('play', function () {
+        video.position = this.currentTime;
+        video.lastupdate = $.now() / 1000;
+        video.status = 'playing';
+        socket.emit('video play', video.position);
+    });
+
+    $video.addEventListener('pause', function () {
+        video.position = this.currentTime;
+        video.lastupdate = $.now() / 1000;
+        video.status = 'paused';
+        socket.emit('video pause', video.position);
+    });
+
+    $video.addEventListener('timeupdate', function () {
+        var newpos = this.currentTime,
+            newtime = $.now() / 1000;
+        var posdiff = newpos - video.position,
+            timediff = newtime - video.lastupdate;
+        video.position = this.currentTime;
+        video.lastupdate = newtime;
+        if (video.status === 'paused' || Math.abs(posdiff - timediff) > 1)
+            socket.emit('video seek', video.position);
+    });
+
+    /* Choose File */
+
+    $('#btn_upload').click(function () {
+        // TODO
+    });
+
+    $('#choose_file').on('hidden', function () {
+        $$filelist.empty();
+        $$filelist.off('click', '>li');
+    });
+
+    function showChooseFile(supportTypes, canUseDirectly, itemChosen) {
+        // list files
+        var ids = Object.keys(files);
+        var fileCount = 0;
+        for (var i = 0; i < ids.length; ++i) {
+            var fileId = ids[i],
+                filename = files[fileId].filename;
+            for (var j = 0; j < supportTypes.length; ++j) {
+                var extname = supportTypes[j],
+                    fileext = filename.substr(-extname.length);
+                if (fileext.toLowerCase() !== extname)
+                    continue;
+                // TODO files been uploading
+                var $$li = $('<li>').attr('id', 'file-' + fileId)
+                    .append($('<filename>').text(filename))
+                    .append($('<filesize>').text(
+                            humanReadablizeSize(files[fileId].length)))
+                    .appendTo($$filelist);
+                $$li[0].dataset.fileid = fileId;
+                ++fileCount;
+                break;
+            }
+        }
+        // set file uploader
+        $file.dataset.filetypes = supportTypes.join(';');
+        $file.dataset.canUseDirectly = canUseDirectly;
+        // show choose file
+        if (!fileCount) {
+            $$nofiles.show();
+        }
+        else {
+            $$nofiles.hide();
+            $$filelist.on('click', 'li', function () {
+                $('#choose_file').modal('hide');
+                itemChosen(this.dataset.fileid);
+            });
+        }
+        $('#choose_file').modal();
+    }
+
     /* Mode switchers */
 
     $('#mode_white').click(function () {
@@ -456,11 +544,11 @@ function initHost(socket, opts) {
         $$body.addClass('white').removeClass('video slide');
 
         // components
-        $$video.hide();
-        $$slide.hide();
+        cleanVideo();
+        cleanSlide();
         $$canvas.show();
         // switch button status
-        $('#drawing_tools>button').each(function () {
+        $('#drawing_tools>button, #brush_styler>button').each(function () {
             this.disabled = false;
         });
         $('#enable_drawing').hide();
@@ -478,6 +566,38 @@ function initHost(socket, opts) {
 
         // default tool
         $('#pencil').click();
+    });
+
+    $('#mode_video').click(function () {
+        showChooseFile(SUPPORT_VIDEO, true, function (fileId) {
+            // set current
+            $('#mode_switcher>button').removeClass('current');
+            $('#mode_video').addClass('current');
+            $$body.addClass('video').removeClass('white slide');
+
+            // switch button status
+            $('#drawing_tools>button, #brush_styler>button').each(function () {
+                this.disabled = true;
+            });
+
+            // set video
+            $video.controls = true;
+            $$video.empty();
+            $('<source>').attr('src', getFilePath(id, fileId))
+                         .attr('type', 'video/mp4') // XXX support more type
+                         .appendTo($video);
+            cleanWhite();
+            cleanSlide();
+            $$video.show();
+
+            // change mode
+            mode = 'video';
+            video.fileid = fileId;
+            video.status = 'paused';
+            video.position = 0;
+            // send event
+            socket.emit('mode video', fileId);
+        });
     });
     
     /* Main process */
