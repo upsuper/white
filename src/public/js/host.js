@@ -1,5 +1,5 @@
 function initHost(socket, opts) {
-    var id;
+    var id, cacheDir;
     var files = {},
         ratio = opts.ratio;
     canvas = {
@@ -30,14 +30,14 @@ function initHost(socket, opts) {
         THICKNESSES = [
             0.007, 0.009, 0.012, 0.015, 0.02
         ],
-        SUPPORT_VIDEO = [
-            '.mp4'
-        ];
+        SUPPORT_VIDEO = ['.mp4'],
+        SUPPORT_SLIDE_ARCHIVE = ['.zip'];
 
     // elements;
     var $$body = $('body');
     var $$buttons = $('toolbar>button'),
         $$toolbars = $('toolbar'),
+        $$enable = $('#enable_drawing'),
         $$undo = $('#undo'),
         $$redo = $('#redo'),
         $$clear = $('#clear'),
@@ -185,6 +185,43 @@ function initHost(socket, opts) {
 
     /* Tools */
     
+    function initDrawing() {
+        canvas.graphics = [];
+        canvas.history = [];
+        redrawGraphics();
+    }
+
+    function enableDrawing() {
+        $('#drawing_tools>button, #brush_styler>button').each(function () {
+            this.disabled = false;
+        });
+        $undo.disabled = canvas.graphics.length == 0;
+        $redo.disabled = canvas.history.length == 0;
+        $clear.disabled = $undo.disabled ||
+            canvas.graphics[canvas.graphics.length - 1].type == 'clear';
+        $$canvas.css('pointer-events', 'auto');
+    }
+
+    function disableDrawing() {
+        $('#drawing_tools>button, #brush_styler>button').each(function () {
+            this.disabled = true;
+        });
+        $$enable.attr('disabled', false);
+        $$canvas.css('pointer-events', 'none');
+    }
+
+    $('#enable_drawing').click(function () {
+        var $$t = $(this);
+        if ($$t.hasClass('current')) {
+            disableDrawing();
+            $$t.removeClass('current');
+        }
+        else {
+            enableDrawing();
+            $$t.addClass('current');
+        }
+    });
+
     function setCurrentTool(elem) {
         $('#drawing_tools>button').removeClass('current');
         $(elem).addClass('current');
@@ -532,6 +569,18 @@ function initHost(socket, opts) {
         $('#choose_file').modal();
     }
 
+    /* Waiting */
+
+    function showWaiting() {
+        $('#waiting').modal({
+            keyboard: false,
+            backdrop: 'static'
+        });
+    }
+    function hideWaiting() {
+        $('#waiting').modal('hide');
+    }
+
     /* Mode switchers */
 
     $('#mode_white').click(function () {
@@ -548,20 +597,12 @@ function initHost(socket, opts) {
         cleanSlide();
         $$canvas.show();
         // switch button status
-        $('#drawing_tools>button, #brush_styler>button').each(function () {
-            this.disabled = false;
-        });
+        initDrawing();
+        enableDrawing();
         $('#enable_drawing').hide();
-        $undo.disabled = true;
-        $redo.disabled = true;
-        $clear.disabled = true;
 
         // change mode
         mode = 'white';
-        canvas.graphics = [];
-        canvas.history = [];
-        redrawGraphics();
-        // send event
         socket.emit('mode white');
 
         // default tool
@@ -589,7 +630,7 @@ function initHost(socket, opts) {
             cleanWhite();
             cleanSlide();
             $$video.show();
-
+    
             // change mode
             mode = 'video';
             video.fileid = fileId;
@@ -599,6 +640,52 @@ function initHost(socket, opts) {
             socket.emit('mode video', fileId);
         });
     });
+
+    $('#mode_slide').click(function () {
+        showChooseFile(SUPPORT_SLIDE_ARCHIVE, false, function (fileId) {
+            showWaiting();
+            socket.emit('slide prepare', fileId);
+        });
+        socket.once('slide fail', function (slideId, err) {
+            socket.removeAllListeners('slide ready');
+            alert(err);
+        });
+        socket.once('slide ready', function (slideId) {
+            // set current
+            $('#mode_switcher>button').removeClass('current');
+            $('#mode_slide').addClass('current');
+            $$body.addClass('slide').removeClass('white video');
+
+            // components
+            cleanVideo();
+            $$canvas.show();
+            $slide.src = cacheDir + '/slide-' + slideId + '/';
+            $$slide.one('load', function () {
+                slideControl = $slide.contentWindow.slideControl;
+                slideControl.stepchange(function (step, pagechanged) {
+                    if (pagechanged) {
+                        initDrawing();
+                        $$enable.toggleClass('current').click();
+                    }
+                    socket.emit('slide step', step, pagechanged);
+                });
+            });
+            $$slide.show();
+            // switch button status
+            initDrawing();
+            disableDrawing();
+            $$enable.attr('disabled', false)
+                    .show().removeClass('current');
+            slide.slideid = slideId;
+            slide.step = null;
+
+            // change mode
+            mode = 'slide';
+            socket.emit('mode slide', slideId);
+
+            hideWaiting();
+        });
+    });
     
     /* Main process */
 
@@ -606,6 +693,7 @@ function initHost(socket, opts) {
 
     socket.once('ready', function (_id) {
         id = _id;
+        cacheDir = CACHE_DIR + '/' + id;
         $$toolbars.show();
         $('#mode_white').click();
     });

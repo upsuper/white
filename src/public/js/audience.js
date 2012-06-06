@@ -5,6 +5,7 @@ function initAudience(socket, id, ratio) {
     ratio = ratio.split(':');
     ratio = parseInt(ratio[0]) / parseInt(ratio[1]);
 
+    var $$body = $('body');
     initElements();
 
     // initialize audience
@@ -19,6 +20,7 @@ function initAudience(socket, id, ratio) {
         window.onresize();
         
         // initialize mode
+        $$body.addClass(mode);
         switch (mode) {
             case 'white':
                 $$canvas.show();
@@ -147,6 +149,7 @@ function initAudience(socket, id, ratio) {
     // White mode
     socket.on('mode white', function () {
         mode = 'white';
+        $$body.addClass('white').removeClass('video slide');
         // clean
         canvas.graphics = [];
         canvas.history = [];
@@ -161,6 +164,7 @@ function initAudience(socket, id, ratio) {
     // Video mode
     socket.on('mode video', function (fileid) {
         mode = 'video';
+        $$body.addClass('video').removeClass('white slide');
         video.fileid = fileid;
         video.status = 'paused';
         video.position = 0;
@@ -208,6 +212,7 @@ function initAudience(socket, id, ratio) {
 
         // clean canvas
         mode = 'slide';
+        $$body.addClass('slide').removeClass('white video');
         canvas.graphics = [];
         canvas.history = [];
         canvas.drawing = null;

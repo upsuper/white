@@ -16,7 +16,7 @@ video {
     background-color: #000000;
 }
 
-.slide>canvas, #drawing {
+.slide canvas, #drawing {
     background: transparent;
 }
 
@@ -147,6 +147,10 @@ toolbar>button[disabled] {
 
 #file {
     display: none;
+}
+
+#waiting>.modal-body {
+    text-align: center;
 }
 
 palette {
