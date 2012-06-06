@@ -17,6 +17,7 @@ var fs = require('fs'),
     events = require('events'),
     crypto = require('crypto'),
     mkdirp = require('mkdirp'),
+    rimraf = require('rimraf'),
     express = require('express'),
     connect = require('connect'),
     socketio = require('socket.io'),
@@ -346,6 +347,16 @@ function handleHost(socket, id, opts) {
         console.log('broadcast ' + id + ' finished');
         broadcastEvents('host disconnected');
 
+        var cleanCount = 0;
+        function increase() {
+            cleanCount += 1;
+        }
+        function decrease() {
+            cleanCount -= 1;
+            if (!cleanCount)
+                fs.rmdir(cacheDir);
+        }
+        increase();
         // clean up cache files
         var ids = Object.keys(files);
         for (var i = 0; i < ids.length; ++i) {
@@ -353,16 +364,16 @@ function handleHost(socket, id, opts) {
                 file = files[fileId];
             if (!file.finished)
                 continue;
-            fs.unlink(file.location);
+            increase();
+            fs.unlink(file.location, decrease);
         }
         // clean up extracted slides
         ids = Object.keys(slides);
         for (var i = 0; i < ids.length; ++i) {
-            var slideId = ids[i];
-            // TODO
+            increase();
+            rimraf(cacheDir + '/slide-' + ids[i], decrease);
         }
-        // try to delete cache dir
-        fs.rmdir(cacheDir);
+        decrease();
 
         delete broadcasts[id];
     });
