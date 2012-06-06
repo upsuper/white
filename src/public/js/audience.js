@@ -74,18 +74,14 @@ function initAudience(socket, id, ratio) {
     // other mode change
     function initVideo() {
         cleanVideo();
-        function finishInit() {
-            $video.currentTime = video.position;
-            if (video.status === 'playing')
-                $video.play();
-            else
-                $video.pause();
-            $video.removeEventListener(finishInit);
-        }
-        $video.addEventListener('loadedmetadata', finishInit);
         $('<source>').attr('src', getFilePath(id, video.fileid))
                      .attr('type', 'video/mp4') // XXX support more type
                      .appendTo($video);
+        setVideoPos(video.position);
+        if (video.status === 'playing')
+            $video.play();
+        else
+            $video.pause();
     }
     function initSlide() {
         $slide.src = cacheDir + '/slide-' + slide.slideid + '/';
@@ -174,36 +170,34 @@ function initAudience(socket, id, ratio) {
         cleanWhite();
         cleanSlide();
     });
-    socket.on('video play', function (pos) {
-        video.status = 'playing';
-        $video.currentTime = video.position = pos;
-        $video.play();
-    });
-    socket.on('video pause', function (pos) {
-        video.status = 'paused';
-        video.position = pos;
-        if ($video.currentTime >= pos) {
-            $video.pause();
-        }
-        else {
-            $$video.on('timeupdate', function () {
-                if ($video.currentTime >= pos) {
-                    $video.pause();
-                    $$video.off('timeupdate');
-                }
-            });
-        }
-    });
-    socket.on('video seek', function (pos) {
+    function setVideoPos(pos) {
         if ($video.readyState >= 1) {
             $video.currentTime = video.position = pos;
         }
         else {
-            $$video.on('loadedmetadata', function () {
+            $$video.one('loadedmetadata', function() {
+                if (video.status === 'paused')
+                    $video.pause();
+                else if (video.status === 'playing')
+                    $video.play();
                 $video.currentTime = video.position = pos;
-                $$video.off('loadedmetadata');
             });
+            if ($video.paused)
+                $video.play();
         }
+    }
+    socket.on('video play', function (pos) {
+        video.status = 'playing';
+        setVideoPos(pos);
+        $video.play();
+    });
+    socket.on('video pause', function (pos) {
+        video.status = 'paused';
+        setVideoPos(pos);
+        $video.pause();
+    });
+    socket.on('video seek', function (pos) {
+        setVideoPos(pos);
     });
 
     // Slide mode

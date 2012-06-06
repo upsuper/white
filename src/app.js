@@ -407,7 +407,8 @@ function handleAudience(socket, audId, id) {
                 fileid: video.fileid,
                 status: video.status,
                 position: video.position + 
-                    (video.status === 'playing' ? now() - video.lastupdate : 0)
+                    (video.status === 'playing' ?
+                     (now() - video.lastupdate) / 1000 : 0)
             },
             slide: {
                 slideid: slide.slideid,
