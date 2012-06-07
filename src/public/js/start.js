@@ -12,10 +12,12 @@ $(function () {
                      .append(
                          $('<a>').text(bc.title)
                                  .attr('href', '#')
-                                 .attr('title', bc.desc)
+                                 .attr('title', bc.title)
+                                 .attr('data-content', bc.desc)
                                  .attr('data-id', k)
                                  .attr('data-ratio', bc.ratio)
                                  .addClass('btn btn-large')
+                                 .popover()
                          )
                      .prependTo($bclist);
         }

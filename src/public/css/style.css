@@ -41,8 +41,13 @@ toolbar, palette, chooser {
     display: none;
 }
 
+h1 {
+    text-align: center;
+    margin: 50px 0 0;
+}
+
 #bclist {
-    margin: 50px auto;
+    margin: 20px auto;
     width: 200px;
 }
 
