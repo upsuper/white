@@ -21,6 +21,12 @@ $(function () {
         }
     });
 
+    // server disconnected
+    socket.on('disconnect', function () {
+        // reload page to exit
+        window.location.reload();
+    });
+
     // Select broadcast
     $bclist.click(function (e) {
         var t = e.target;

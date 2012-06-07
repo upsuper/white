@@ -52,8 +52,12 @@ var bcNumber = 0,
 
 /* Socket handler */
 
+function listBroadcasts() {
+    return mapObject(broadcasts, filterBroadcastInfo);
+}
+
 function handleSocket(socket) {
-    socket.emit('list', mapObject(broadcasts, filterBroadcastInfo));
+    socket.emit('list', listBroadcasts());
 
     socket.once('create', function (opts) {
         bcNumber += 1;
@@ -376,6 +380,7 @@ function handleHost(socket, id, opts) {
         decrease();
 
         delete broadcasts[id];
+        socket.broadcast.emit('list', listBroadcasts());
     });
 
     // Audience change
@@ -391,6 +396,7 @@ function handleHost(socket, id, opts) {
     // Broadcast ready
     console.log('broadcast ' + id + ' ready');
     socket.emit('ready', id);
+    socket.broadcast.emit('list', listBroadcasts());
 }
 
 function handleAudience(socket, audId, id) {
