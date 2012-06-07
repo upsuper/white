@@ -157,7 +157,7 @@ function handleHost(socket, id, opts) {
     function broadcastEvents(evt, args) {
         // convert args to array
         args = args ? Array.prototype.slice.call(args) : [];
-        console.log(evt, args);
+        //console.log(evt, args);
         args.unshift(evt);
         var audience = broadcast.audience;
         for (var audId in audience)
@@ -306,7 +306,7 @@ function handleHost(socket, id, opts) {
                     [file.location, slideDir],
                     function (error, stdout, stderr) {
                         if (error)
-                            slideFail('extract: ' + stdout.strip());
+                            slideFail('extract: ' + stdout.trim());
                         else
                             slideReady();
                     });
