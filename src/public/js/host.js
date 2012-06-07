@@ -159,13 +159,17 @@ function initHost(socket, opts) {
         function setPos(e) {
             e.width = width;
             e.height = height;
+            e.style.width = width + 'px';
+            e.style.height = height + 'px';
             e.style.left = offsetX + 'px';
             e.style.top = offsetY + 'px';
         }
         setPos($drawing);
         setPos($graphics);
         setPos($video);
-        setPos($slide);
+        setPos($slideWrapper);
+        if (slideControl && slideControl.resize)
+            slideControl.resize();
     
         // set palette & chooser
         var widthScale = 'scale(' + (width / refWidth) + ')';
@@ -561,7 +565,7 @@ function initHost(socket, opts) {
         }
         else {
             $$nofiles.hide();
-            $$filelist.on('click', 'li', function () {
+            $$filelist.one('click', 'li', function () {
                 $('#choose_file').modal('hide');
                 itemChosen(this.dataset.fileid);
             });
@@ -662,6 +666,8 @@ function initHost(socket, opts) {
             $slide.src = cacheDir + '/slide-' + slideId + '/';
             $$slide.one('load', function () {
                 slideControl = $slide.contentWindow.slideControl;
+                if (slideControl.resize)
+                    slideControl.resize();
                 slideControl.stepchange(function (step, pagechanged) {
                     if (pagechanged) {
                         initDrawing();
@@ -670,7 +676,7 @@ function initHost(socket, opts) {
                     socket.emit('slide step', step, pagechanged);
                 });
             });
-            $$slide.show();
+            $$slideWrapper.show();
             // switch button status
             initDrawing();
             disableDrawing();

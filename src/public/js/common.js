@@ -7,23 +7,25 @@ var mode, canvas, video, slide;
 var width, height;
 
 // elements
-var $$canvas, $$drawing, $$graphics, $$video, $$slide;
-var $canvas, $drawing, $graphics, $video, $slide;
+var $$canvas, $$drawing, $$graphics, $$video, $$slide, $$slideWrapper;
+var $canvas, $drawing, $graphics, $video, $slide, $slideWrapper;
 var ctxGraphics, ctxDrawing;
 var slideControl;
 
 function initElements() {
-    $$canvas = $('#canvas'),
-    $$drawing = $('#drawing'),
-    $$graphics = $('#graphics'),
-    $$video = $('#video'),
+    $$canvas = $('#canvas');
+    $$drawing = $('#drawing');
+    $$graphics = $('#graphics');
+    $$video = $('#video');
+    $$slideWrapper = $('#slide_wrapper');
     $$slide = $('#slide');
-    $canvas = $$canvas[0],
-    $drawing = $$drawing[0],
-    $graphics = $$graphics[0],
-    $video = $$video[0],
+    $canvas = $$canvas[0];
+    $drawing = $$drawing[0];
+    $graphics = $$graphics[0];
+    $video = $$video[0];
+    $slideWrapper = $$slideWrapper[0];
     $slide = $$slide[0];
-    ctxGraphics = $graphics.getContext('2d'),
+    ctxGraphics = $graphics.getContext('2d');
     ctxDrawing = $drawing.getContext('2d');
 }
 
@@ -87,4 +89,7 @@ function cleanVideo() {
     $$video.hide().empty()
            .attr('src', '').removeAttr('src');
 }
-function cleanSlide() { $$slide.hide().attr('src', 'about:blank'); }
+function cleanSlide() {
+    $$slideWrapper.hide();
+    $$slide.attr('src', 'about:blank');
+}

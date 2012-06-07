@@ -32,7 +32,7 @@ function initAudience(socket, id, ratio) {
             case 'slide':
                 initSlide();
                 $$canvas.show();
-                $$slide.show();
+                $$slideWrapper.show();
                 break;
             default:
                 // XXX Error!!!
@@ -61,12 +61,16 @@ function initAudience(socket, id, ratio) {
         function setPos(e) {
             e.width = width;
             e.height = height;
+            e.style.width = width + 'px';
+            e.style.height = height + 'px';
             e.style.left = (window.innerWidth - width) / 2 + 'px';
             e.style.top = (window.innerHeight - height) / 2 + 'px';
         }
         setPos($drawing);
         setPos($graphics);
-        setPos($slide);
+        setPos($slideWrapper);
+        if (slideControl && slideControl.resize)
+            slideControl.resize();
         
         // redraw
         redrawGraphics();
@@ -89,6 +93,8 @@ function initAudience(socket, id, ratio) {
         $slide.src = cacheDir + '/slide-' + slide.slideid + '/';
         $$slide.one('load', function () {
             slideControl = $slide.contentWindow.slideControl;
+            if (slideControl.resize)
+                slideControl.resize();
             if (slide.step)
                 slideControl.go(slide.step);
         });
@@ -220,7 +226,7 @@ function initAudience(socket, id, ratio) {
         redrawDrawing();
         // display
         $$canvas.show();
-        $$slide.show();
+        $$slideWrapper.show();
         cleanVideo();
     });
     socket.on('slide step', function (step, pagechanged) {

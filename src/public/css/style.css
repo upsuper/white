@@ -20,13 +20,23 @@ video {
     background: transparent;
 }
 
-#drawing, #graphics, #video, #slide, palette, chooser {
+#drawing, #graphics, #video, #slide_wrapper, palette, chooser {
     position: absolute;
+}
+
+#slide_wrapper {
+    overflow: hidden;
+}
+
+#slide {
+    width: 1100%;
+    height: 100%;
+    margin-left: -500%;
 }
 
 /* Start */
 
-#canvas, #video, #slide,
+#canvas, #video, #slideWrapper,
 toolbar, palette, chooser {
     display: none;
 }
