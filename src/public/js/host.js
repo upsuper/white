@@ -498,10 +498,16 @@ function initHost(socket, opts) {
     /* Video */
 
     $video.addEventListener('play', function () {
-        video.position = this.currentTime;
-        video.lastupdate = $.now() / 1000;
-        video.status = 'playing';
-        socket.emit('video play', video.position);
+        function startPlay() {
+            video.position = $video.currentTime;
+            video.lastupdate = $.now() / 1000;
+            video.status = 'playing';
+            socket.emit('video play', video.position);
+        }
+        if ($video.readyState >= 1)
+            startPlay();
+        else
+            $$video.one('loadedmetadata', startPlay);
     });
 
     $video.addEventListener('pause', function () {
