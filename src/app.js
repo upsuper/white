@@ -28,15 +28,16 @@ var StreamCache = require('./stream-cache.js');
 /* Initialize */
 
 // Initialize express app
-var app = express.createServer();
-app.listen(HTTP_PORT);
+var app = express(),
+    server = http.createServer(app);
 app.use(express.logger('dev'));
 app.use(express.static(PUBLIC_DIR));
 app.post('/upload/:id/:fileid', uploadFile);
 app.get('/file/:id/:fileid/:filename?', downloadFile);
+server.listen(HTTP_PORT);
 
 // Initialize socket.io
-var io = socketio.listen(app, {
+var io = socketio.listen(server, {
     'log level': 1,
     //'browser client minification': true,
     'browser client etag': true,
