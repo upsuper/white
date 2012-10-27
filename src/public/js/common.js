@@ -61,10 +61,20 @@ function drawPath(ctx, graph) {
     ctx.strokeStyle = graph.color;
 
     ctx.beginPath();
+    // move to the first point
     ctx.moveTo(path[0].x * width, path[0].y * height);
-    // TODO using bezier smooth
-    for (var i = 1; i < path.length; ++i)
-        ctx.lineTo(path[i].x * width, path[i].y * height);
+
+    for (i = 1; i < path.length - 2; i ++)
+    {
+        var xc = (path[i].x + path[i + 1].x) / 2 * width;
+        var yc = (path[i].y + path[i + 1].y) / 2 * height;
+        ctx.quadraticCurveTo(path[i].x * width, path[i].y * height, xc, yc);
+    }
+    // curve through the last two path
+    ctx.quadraticCurveTo(
+        path[i].x * width, path[i].y * height,
+        path[i+1].x * width ,path[i+1].y * height
+    );
     ctx.stroke();
 
     ctx.restore();
