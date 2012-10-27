@@ -117,7 +117,7 @@ function initHost(socket, opts) {
         }
         // set toolbar
         var toolbarLength = buttonSize / buttonSizeBase;
-        $$buttons.width(buttonSize).height(buttonSize);
+        $$buttons.width(Math.round(buttonSize)).height(Math.round(buttonSize));
         if (curRatio > ratio) {
             // horizontal
             $('body').removeClass('vertical').addClass('horizontal');
@@ -170,7 +170,7 @@ function initHost(socket, opts) {
         setPos($slideWrapper);
         if (slideControl && slideControl.resize)
             slideControl.resize();
-    
+
         // set palette & chooser
         var widthScale = 'scale(' + (width / refWidth) + ')';
         setTransform($$palette, widthScale);
