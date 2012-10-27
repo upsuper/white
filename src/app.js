@@ -199,6 +199,18 @@ function handleHost(socket, id, opts) {
         return false;
     });
 
+    /*
+    socket.onEvent('file cancel', function (fileId) {
+        var fileInfo = files[fileId];
+        var location = fileInfo.location;
+
+        fs.unlink(location + '.part');
+        fs.unlink(location);
+        delete files[fileId];
+        return false;
+    });
+    */
+
     // Draw path
     socket.onEvent('draw path', function (x, y, color, width) {
         canvas.drawing = {
@@ -466,6 +478,7 @@ function uploadFile(req, res) {
         fs.rename(partFile, fileInfo.location, function () {
             fileInfo.finished = true;
             delete fileInfo.stream;
+            res.end();
         });
     });
 

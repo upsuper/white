@@ -152,6 +152,18 @@ toolbar>button[disabled] {
     pointer-events: none;
 }
 
+/*
+#filelist>li>button {
+    pointer-events: auto;
+    cursor: pointer;
+    border: 0 none;
+    text-indent: -100em;
+    background: red;
+    width: 10px;
+    height: 10px;
+}
+*/
+
 #nofiles {
     color: #999999;
     padding: 15px;

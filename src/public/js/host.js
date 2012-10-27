@@ -530,52 +530,145 @@ function initHost(socket, opts) {
 
     /* Choose File */
 
-    $('#btn_upload').click(function () {
-        // TODO
-    });
+    function isSupportType(filename, supportTypes) {
+        for (var i = 0; i < supportTypes.length; ++i) {
+            var extname = supportTypes[i],
+                fileext = filename.substr(-extname.length);
+            if (fileext.toLowerCase() === extname)
+                return true;
+        }
+        return false;
+    }
 
-    $('#choose_file').on('hidden', function () {
+    function updateFileList(supportTypes, canUseDirectly) {
         $$filelist.empty();
-        $$filelist.off('click', 'li');
-    });
 
-    function showChooseFile(supportTypes, canUseDirectly, itemChosen) {
         // list files
         var ids = Object.keys(files);
         var fileCount = 0;
         for (var i = 0; i < ids.length; ++i) {
             var fileId = ids[i],
-                filename = files[fileId].filename;
-            for (var j = 0; j < supportTypes.length; ++j) {
-                var extname = supportTypes[j],
-                    fileext = filename.substr(-extname.length);
-                if (fileext.toLowerCase() !== extname)
-                    continue;
-                // TODO files been uploading
-                var $$li = $('<li>').attr('id', 'file-' + fileId)
-                    .append($('<filename>').text(filename))
-                    .append($('<filesize>').text(
-                            humanReadablizeSize(files[fileId].length)))
-                    .appendTo($$filelist);
-                $$li[0].dataset.fileid = fileId;
-                ++fileCount;
-                break;
+                file = files[fileId],
+                filename = file.filename;
+            if (!isSupportType(filename, supportTypes))
+                continue;
+            var $$li = $('<li>').attr('id', 'file-' + fileId)
+                .append($('<filename>').text(filename))
+                .append($('<filesize>').text(
+                        humanReadablizeSize(files[fileId].length)))
+                .appendTo($$filelist);
+            var $li = $$li[0];
+            $li.dataset.fileId = fileId;
+            if (!file.finished) {
+                if (!canUseDirectly)
+                    $$li.attr('disabled', true);
+                $$li/*.append($('<button>')
+                        .text('Cancel')
+                        .click(function (e) {
+                            e.stopPropagation();
+                            file.xhr.abort();
+                            socket.emit('file cancel', fileId);
+                            delete files[fileId];
+                            updateFileList(supportTypes, canUseDirectly);
+                        })) */ // FIXME cancel is buggy
+                    .append($('<div>')
+                        .addClass('progress')
+                        .append($('<div>')
+                            .addClass('bar')
+                            .css('width', file.progress + '%')));
             }
+            ++fileCount;
         }
-        // set file uploader
-        $file.dataset.filetypes = supportTypes.join(';');
-        $file.dataset.canUseDirectly = canUseDirectly;
-        // show choose file
-        if (!fileCount) {
+
+        if (!fileCount)
             $$nofiles.show();
-        }
-        else {
+        else
             $$nofiles.hide();
-            $$filelist.one('click', 'li', function () {
-                $('#choose_file').modal('hide');
-                itemChosen(this.dataset.fileid);
-            });
-        }
+    }
+
+    $('#btn_upload').click(function () {
+        var fileTypes = $file.dataset.fileTypes.split(';');
+        var canUseDirectly = parseInt($file.dataset.canUseDirectly);
+
+        $$file.unbind('change');
+        $$file.change(function () {
+            var files_ = this.files;
+            function nextFile(index) {
+                if (index >= files_.length)
+                    return;
+
+                var file = files_[index],
+                    filename = file.name;
+                if (!isSupportType(filename, fileTypes))
+                    return nextFile(index + 1);
+
+                socket.once('file ready', function (fileId, secret) {
+                    var headers = {};
+                    headers[HEADER_PREFIX + 'secret'] = secret;
+
+                    var file_ = files[fileId] = {
+                        filename: filename,
+                        finished: false,
+                        progress: 0,
+                        length: file.size,
+                        location: getFilePath(id, fileId),
+                    };
+
+                    function getXHR() {
+                        var xhr = $.ajaxSettings.xhr();
+                        xhr.upload.addEventListener('progress', function (e) {
+                            var $f = document.getElementById('file-' + fileId);
+                            var $$p = $('>.progress', $f);
+                            var progress = e.loaded * 100 / e.total;
+                            file_.progress = progress;
+                            $('.bar', $$p).css('width', progress + '%');
+                        }, false);
+                        return xhr;
+                    }
+
+                    file_.xhr = $.ajax({
+                        type: 'POST',
+                        url: '/upload/' + id + '/' + fileId,
+                        xhr: getXHR,
+                        data: file,
+                        processData: false,
+                        headers: headers,
+                    }).done(function () {
+                        file_.finished = true;
+                        file_.location = cacheDir + '/file-' + fileId;
+                        delete file_.progress;
+                        delete file_.xhr;
+                        updateFileList(fileTypes, canUseDirectly);
+                    }).fail(function () {
+                        // FIXME display more information
+                        file_.error = true;
+                        updateFileList(fileTypes, canUseDirectly);
+                    });
+
+                    updateFileList(fileTypes, canUseDirectly);
+                    nextFile(index + 1);
+                });
+                socket.emit('file', filename);
+            }
+            nextFile(0);
+        });
+        $$file.click();
+    });
+
+    $('#choose_file').on('hidden', function () {
+        $$filelist.off('click', 'li');
+    });
+
+    function showChooseFile(supportTypes, canUseDirectly, itemChosen) {
+        updateFileList(supportTypes, canUseDirectly);
+        // set file uploader
+        $file.dataset.fileTypes = supportTypes.join(';');
+        $file.dataset.canUseDirectly = canUseDirectly ? 1 : 0;
+        // show choose file
+        $$filelist.one('click', 'li', function () {
+            $('#choose_file').modal('hide');
+            itemChosen(this.dataset.fileId);
+        });
         $('#choose_file').modal();
     }
 
@@ -620,7 +713,7 @@ function initHost(socket, opts) {
     });
 
     $('#mode_video').click(function () {
-        showChooseFile(SUPPORT_VIDEO, true, function (fileId) {
+        showChooseFile(SUPPORT_VIDEO, false, function (fileId) {
             // set current
             $('#mode_switcher>button').removeClass('current');
             $('#mode_video').addClass('current');

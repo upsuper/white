@@ -1,4 +1,5 @@
 var CACHE_DIR = '/cache';
+var HEADER_PREFIX = 'webapp.white-';
 
 // state variables
 var mode, canvas, video, slide;
