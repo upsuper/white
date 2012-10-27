@@ -71,10 +71,12 @@ function drawPath(ctx, graph) {
         ctx.quadraticCurveTo(path[i].x * width, path[i].y * height, xc, yc);
     }
     // curve through the last two path
-    ctx.quadraticCurveTo(
-        path[i].x * width, path[i].y * height,
-        path[i+1].x * width ,path[i+1].y * height
-    );
+    if (path.length >= 2) {
+        ctx.quadraticCurveTo(
+            path[i].x * width, path[i].y * height,
+            path[i + 1].x * width, path[i + 1].y * height
+        );
+    }
     ctx.stroke();
 
     ctx.restore();
