@@ -536,7 +536,7 @@ function initHost(socket, opts) {
 
     $('#choose_file').on('hidden', function () {
         $$filelist.empty();
-        $$filelist.off('click', '>li');
+        $$filelist.off('click', 'li');
     });
 
     function showChooseFile(supportTypes, canUseDirectly, itemChosen) {
@@ -571,7 +571,6 @@ function initHost(socket, opts) {
         }
         else {
             $$nofiles.hide();
-            $$filelist.unbind('click');
             $$filelist.one('click', 'li', function () {
                 $('#choose_file').modal('hide');
                 itemChosen(this.dataset.fileid);
