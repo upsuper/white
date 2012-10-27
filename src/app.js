@@ -19,7 +19,6 @@ var fs = require('fs'),
     mkdirp = require('mkdirp'),
     rimraf = require('rimraf'),
     express = require('express'),
-    connect = require('connect'),
     socketio = require('socket.io'),
     child_process = require('child_process');
 
