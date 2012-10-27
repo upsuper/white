@@ -23,6 +23,8 @@ var fs = require('fs'),
     socketio = require('socket.io'),
     child_process = require('child_process');
 
+var parseRange = require('range-parser');
+
 var StreamCache = require('./stream-cache.js');
 
 /* Initialize */
@@ -500,24 +502,24 @@ function downloadFile(req, res) {
         // Check ranges
         res.setHeader('Accept-Ranges', 'bytes');
         if (ranges)
-            ranges = connect.utils.parseRange(length, ranges);
+            ranges = parseRange(length, ranges);
         if (!ranges) {
             res.statusCode = 200;
         }
-        else {
+        else if (ranges == -1) {
+            res.setHeader('Content-Range', 'bytes */' + stat.size);
+            return res.send(416);
+        }
+        else if (ranges != -2) {
             opts.start = ranges[0].start;
             opts.end = ranges[0].end;
-            if (opts.start > length - 1) {
-                res.setHeader('Content-Range', 'bytes */' + length);
-                return res.send(416);
-            }
             if (opts.end > length - 1)
                 opts.end = length - 1;
             length = opts.end - opts.start + 1;
             res.statusCode = 206;
             res.setHeader('Content-Range',
                     'bytes ' + opts.start + '-' + opts.end +
-                    '/' + s.length);
+                    '/' + fileInfo.length);
         }
         
         // Check method
@@ -526,7 +528,7 @@ function downloadFile(req, res) {
         
         // Send file
         res.setHeader('Content-Length', length);
-        var stream = s.stream.createNewStream(opts);
+        var stream = fileInfo.stream.createNewStream(opts);
         req.on('close', function () { stream.destroy(); });
         stream.pipe(res);
     }

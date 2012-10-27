@@ -11,7 +11,7 @@ function ReadStream(parentStream, opts) {
     if (!(self instanceof ReadStream))
         return new ReadStream(parentStream);
     Stream.call(self);
-    
+
     self.parentStream = parentStream;
     self.readable = true;
     self.number = self.parentStream.readerNum += 1;
