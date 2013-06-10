@@ -1,69 +1,69 @@
 ul {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 li {
-    list-style: none;
+  list-style: none;
 }
 
 canvas, iframe {
-    border: 0 none;
-    background: white;
+  border: 0 none;
+  background: white;
 }
 
 video {
-    background-color: #000000;
+  background-color: #000000;
 }
 
 .slide canvas, #drawing {
-    background: transparent;
+  background: transparent;
 }
 
 #drawing, #graphics, #video, #slide_wrapper, palette, chooser {
-    position: absolute;
+  position: absolute;
 }
 
 #slide_wrapper {
-    overflow: hidden;
+  overflow: hidden;
 }
 
 #slide {
-    width: 1100%;
-    height: 100%;
-    margin-left: -500%;
+  width: 1100%;
+  height: 100%;
+  margin-left: -500%;
 }
 
 /* Start */
 
 #canvas, #video, #slideWrapper,
 toolbar, palette, chooser {
-    display: none;
+  display: none;
 }
 
 h1 {
-    text-align: center;
-    margin: 50px 0 0;
+  text-align: center;
+  margin: 50px 0 0;
 }
 
 #bclist {
-    margin: 20px auto;
-    width: 200px;
+  margin: 20px auto;
+  width: 200px;
 }
 
 #bclist>li {
-    margin: 10px 0;
+  margin: 10px 0;
 }
 
 #bclist .btn {
-    box-sizing: border-box;
-    width: 200px;
+  box-sizing: border-box;
+  width: 200px;
 }
 
 /* Host */
 
 body.host {
-    background: #cccccc;
+  background: #cccccc;
 }
 
 body.horizontal>toolbar {
@@ -73,24 +73,24 @@ body.vertical>toolbar {
 }
 
 body.host #graphics {
-    box-shadow: 2px 2px 8px;
+  box-shadow: 2px 2px 8px;
 }
 
 toolbar>button {
-    position: absolute;
-    border: 0 none;
-    background-color: transparent;
-    background-size: auto 100%;
-    background-image: url(../img/buttons.png);
-    text-indent: -10000px;
+  position: absolute;
+  border: 0 none;
+  background-color: transparent;
+  background-size: auto 100%;
+  background-image: url(../img/buttons.png);
+  text-indent: -10000px;
 }
 toolbar>button.current, toolbar>button:hover {
-    background-image: url(../img/buttons_cur.png);
+  background-image: url(../img/buttons_cur.png);
 }
 toolbar>button[disabled] {
-    opacity: .4;
-    background-image: url(../img/buttons.png);
-    cursor: default;
+  opacity: .4;
+  background-image: url(../img/buttons.png);
+  cursor: default;
 }
 #enable_drawing { background-position: -0% 0px; }
 #pencil         { background-position: -100% 0px; }
@@ -106,143 +106,143 @@ toolbar>button[disabled] {
 #mode_slide     { background-position: -1100% 0px; }
 
 #color {
-    position: relative;
+  position: relative;
 }
 #color_show {
-    width: 48%; height: 34%;
-    position: absolute;
-    top: 25%; left: 16%;
-    border-radius: 50%;
-    -webkit-transform: rotate(20deg);
-    -moz-transform: rotate(20deg);
-    -o-transform: rotate(20deg);
-    transform: rotate(20deg);
+  width: 48%; height: 34%;
+  position: absolute;
+  top: 25%; left: 16%;
+  border-radius: 50%;
+  -webkit-transform: rotate(20deg);
+  -moz-transform: rotate(20deg);
+  -o-transform: rotate(20deg);
+  transform: rotate(20deg);
 }
 
 #choose_file>.modal-body {
-    padding: 0;
+  padding: 0;
 }
 
 #filelist>li {
-    padding: 15px;
-    border-bottom: 1px solid #eeeeee;
-    cursor: pointer;
+  padding: 15px;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
 }
 
 #filelist>li:hover {
-    background: #f5f5f5;
+  background: #f5f5f5;
 }
 
 #filelist>li:last-child {
-    border-bottom: 0 none;
+  border-bottom: 0 none;
 }
 
 #filelist>li>filesize {
-    float: right;
-    color: #999999;
+  float: right;
+  color: #999999;
 }
 
 #filelist>li>.progress {
-    margin: 5px 0 0;
+  margin: 5px 0 0;
 }
 
 #filelist>li[disabled] {
-    cursor: default;
-    opacity: .4;
-    pointer-events: none;
+  cursor: default;
+  opacity: .4;
+  pointer-events: none;
 }
 
 /*
 #filelist>li>button {
-    pointer-events: auto;
-    cursor: pointer;
-    border: 0 none;
-    text-indent: -100em;
-    background: red;
-    width: 10px;
-    height: 10px;
+  pointer-events: auto;
+  cursor: pointer;
+  border: 0 none;
+  text-indent: -100em;
+  background: red;
+  width: 10px;
+  height: 10px;
 }
 */
 
 #nofiles {
-    color: #999999;
-    padding: 15px;
-    line-height: 120%;
-    font-size: 120%;
-    text-align: center;
+  color: #999999;
+  padding: 15px;
+  line-height: 120%;
+  font-size: 120%;
+  text-align: center;
 }
 
 #file {
-    display: none;
+  display: none;
 }
 
 #waiting>.modal-body {
-    text-align: center;
+  text-align: center;
 }
 
 palette {
-    -webkit-transform-origin: left top;
-    -moz-transform-origin: left top;
-    -o-transform-origin: left top;
-    transform-origin: left top;
+  -webkit-transform-origin: left top;
+  -moz-transform-origin: left top;
+  -o-transform-origin: left top;
+  transform-origin: left top;
 }
 
 palette.pencil-color {
-    width: 168px;
+  width: 168px;
 }
 
 palette.highlighter-color {
-    width: 112px;
+  width: 112px;
 }
 
 color {
-    width: 44px;
-    height: 32px;
-    border-radius: 50%;
-    -webkit-transform: rotate(25deg);
-    -moz-transform: rotate(25deg);
-    -o-transform: rotate(25deg);
-    transform: rotate(25deg);
-    box-shadow: 3px 1px 2px;
-    float: left;
-    margin: 5px;
-    cursor: pointer;
+  width: 44px;
+  height: 32px;
+  border-radius: 50%;
+  -webkit-transform: rotate(25deg);
+  -moz-transform: rotate(25deg);
+  -o-transform: rotate(25deg);
+  transform: rotate(25deg);
+  box-shadow: 3px 1px 2px;
+  float: left;
+  margin: 5px;
+  cursor: pointer;
 }
 
 color:hover, color.current {
-    box-shadow: 0 0 5px 2px #ffff00;
+  box-shadow: 0 0 5px 2px #ffff00;
 }
 
 chooser {
-    width: 56px;
-    -webkit-transform-origin: top left;
-    -moz-transform-origin: top left;
-    -o-transform-origin: top left;
-    transform-origin: top left;
+  width: 56px;
+  -webkit-transform-origin: top left;
+  -moz-transform-origin: top left;
+  -o-transform-origin: top left;
+  transform-origin: top left;
 }
 
 thickness {
-    width: 54px; height: 34px;
-    border: 1px solid #f5f5f5;
-    display: block;
-    padding: 0;
-    box-shadow: 2px 2px 2px 0px #555;
-    position: relative;
-    float: left;
-    background-color: #fff;
-    cursor: pointer;
+  width: 54px; height: 34px;
+  border: 1px solid #f5f5f5;
+  display: block;
+  padding: 0;
+  box-shadow: 2px 2px 2px 0px #555;
+  position: relative;
+  float: left;
+  background-color: #fff;
+  cursor: pointer;
 }
 
 thickness.current, thickness:hover {
-    box-shadow: 2px 2px 2px 0px #555, inset 0 0 8px #fcbf54;
+  box-shadow: 2px 2px 2px 0px #555, inset 0 0 8px #fcbf54;
 }
 
 thickness>div {
-    border-radius: 50%;
-    background-color: #000;
-    position: absolute;
-    top: 50%; left: 50%;
-    pointer-events: none;
+  border-radius: 50%;
+  background-color: #000;
+  position: absolute;
+  top: 50%; left: 50%;
+  pointer-events: none;
 }
 
 /* Audience */

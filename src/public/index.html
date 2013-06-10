@@ -1,118 +1,118 @@
 <!DOCTYPE HTML>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>White</title>
-    <link rel="stylesheet" href="/css/bootstrap.css"> <!-- TODO: use .min -->
-    <link rel="stylesheet" href="/css/style.css">
-    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="/js/bootstrap.js"></script> <!-- TODO: use .min -->
-    <script type="text/javascript" src="/js/start.js"></script>
-    <script type="text/javascript" src="/js/common.js"></script>
-    <script type="text/javascript" src="/js/host.js"></script>
-    <script type="text/javascript" src="/js/audience.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>White</title>
+  <link rel="stylesheet" href="/css/bootstrap.css"> <!-- TODO: use .min -->
+  <link rel="stylesheet" href="/css/style.css">
+  <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+  <script type="text/javascript" src="/js/bootstrap.js"></script> <!-- TODO: use .min -->
+  <script type="text/javascript" src="/js/start.js"></script>
+  <script type="text/javascript" src="/js/common.js"></script>
+  <script type="text/javascript" src="/js/host.js"></script>
+  <script type="text/javascript" src="/js/audience.js"></script>
 </head>
 <body>
-    <div id="start">
-        <h1>White</h1>
-        <ul id="bclist">
-            <li><a href="#create_new" title="Create New Broadcast" class="btn btn-large btn-primary" data-toggle="modal">New Broadcast...</a></li>
-        </ul>
+  <div id="start">
+    <h1>White</h1>
+    <ul id="bclist">
+      <li><a href="#create_new" title="Create New Broadcast" class="btn btn-large btn-primary" data-toggle="modal">New Broadcast...</a></li>
+    </ul>
+  </div>
+  <div id="create_new" class="modal hide">
+    <div class="modal-header">
+      <button class="close" data-dismiss="modal">&times;</button>
+      <h2>Create New Broadcast</h2>
     </div>
-    <div id="create_new" class="modal hide">
-        <div class="modal-header">
-            <button class="close" data-dismiss="modal">&times;</button>
-            <h2>Create New Broadcast</h2>
+    <div class="modal-body form-horizontal">
+      <fieldset>
+        <div class="control-group">
+          <label for="new_title" class="control-label">Title</label>
+          <div class="controls">
+            <input id="new_title" type="text" required>
+          </div>
         </div>
-        <div class="modal-body form-horizontal">
-            <fieldset>
-                <div class="control-group">
-                    <label for="new_title" class="control-label">Title</label>
-                    <div class="controls">
-                        <input id="new_title" type="text" required>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="new_id" class="control-label">ID</label>
-                    <div class="controls">
-                        <input id="new_id" type="text">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="new_ratio" class="control-label">Aspect Ratio</label>
-                    <div class="controls">
-                        <select id="new_ratio">
-                            <option value="4:3">4:3</option>
-                            <option value="16:10">16:10</option>
-                            <option value="16:9">16:9</option>
-                            <option value="3:2">3:2</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label for="new_desc" class="control-label">Description</label>
-                    <div class="controls">
-                        <textarea id="new_desc"></textarea>
-                    </div>
-                </div>
-            </fieldset>
+        <div class="control-group">
+          <label for="new_id" class="control-label">ID</label>
+          <div class="controls">
+            <input id="new_id" type="text">
+          </div>
         </div>
-        <div class="modal-footer">
-            <button id="btn_create" class="btn btn-primary">Create</button>
-            <button class="btn" data-dismiss="modal">Cancel</button>
+        <div class="control-group">
+          <label for="new_ratio" class="control-label">Aspect Ratio</label>
+          <div class="controls">
+            <select id="new_ratio">
+              <option value="4:3">4:3</option>
+              <option value="16:10">16:10</option>
+              <option value="16:9">16:9</option>
+              <option value="3:2">3:2</option>
+            </select>
+          </div>
         </div>
+        <div class="control-group">
+          <label for="new_desc" class="control-label">Description</label>
+          <div class="controls">
+            <textarea id="new_desc"></textarea>
+          </div>
+        </div>
+      </fieldset>
     </div>
-    <toolbar id="drawing_tools">
-        <button id="enable_drawing">Drawing</button>
-        <button id="pencil" title="Pencil">Pencil</button>
-        <button id="eraser" title="Eraser">Eraser</button>
-        <button id="highlighter" title="Highlighter">Highlighter</button>
-        <button id="undo" title="Undo" disabled>Undo</button>
-        <button id="redo" title="Redo" disabled>Redo</button>
-        <button id="clear" title="Clear" disabled>Clear</button>
-    </toolbar>
-    <toolbar id="brush_styler">
-        <button id="thickness" title="Thickness">Thickness</button>
-        <button id="color" title="Color">Color<div id="color_show"></div></button>
-    </toolbar>
-    <toolbar id="mode_switcher">
-        <button id="mode_white" title="White Mode">White</button>
-        <button id="mode_video" title="Video Mode">Video</button>
-        <button id="mode_slide" title="Slide Mode">Slide</button>
-    </toolbar>
-    <div id="slide_wrapper">
-        <iframe id="slide"></iframe>
+    <div class="modal-footer">
+      <button id="btn_create" class="btn btn-primary">Create</button>
+      <button class="btn" data-dismiss="modal">Cancel</button>
     </div>
-    <video id="video" preload="auto"></video>
-    <div id="canvas">
-        <canvas id="graphics"></canvas>
-        <canvas id="drawing"></canvas>
+  </div>
+  <toolbar id="drawing_tools">
+  <button id="enable_drawing">Drawing</button>
+  <button id="pencil" title="Pencil">Pencil</button>
+  <button id="eraser" title="Eraser">Eraser</button>
+  <button id="highlighter" title="Highlighter">Highlighter</button>
+  <button id="undo" title="Undo" disabled>Undo</button>
+  <button id="redo" title="Redo" disabled>Redo</button>
+  <button id="clear" title="Clear" disabled>Clear</button>
+  </toolbar>
+  <toolbar id="brush_styler">
+  <button id="thickness" title="Thickness">Thickness</button>
+  <button id="color" title="Color">Color<div id="color_show"></div></button>
+  </toolbar>
+  <toolbar id="mode_switcher">
+  <button id="mode_white" title="White Mode">White</button>
+  <button id="mode_video" title="Video Mode">Video</button>
+  <button id="mode_slide" title="Slide Mode">Slide</button>
+  </toolbar>
+  <div id="slide_wrapper">
+    <iframe id="slide"></iframe>
+  </div>
+  <video id="video" preload="auto"></video>
+  <div id="canvas">
+    <canvas id="graphics"></canvas>
+    <canvas id="drawing"></canvas>
+  </div>
+  <div id="choose_file" class="modal hide">
+    <div class="modal-header">
+      <button class="close" data-dismiss="modal">&times;</button>
+      <h2>Choose A File</h2>
     </div>
-    <div id="choose_file" class="modal hide">
-        <div class="modal-header">
-            <button class="close" data-dismiss="modal">&times;</button>
-            <h2>Choose A File</h2>
-        </div>
-        <div class="modal-body">
-            <ul id="filelist"></ul>
-            <div id="nofiles" class="placeholder">
-                There is no appropriate file, please upload one.
-            </div>
-        </div>
-        <div class="modal-footer">
-            <input type="file" id="file" multiple>
-            <button id="btn_upload" class="btn btn-primary">Upload New File</button>
-            <button class="btn" data-dismiss="modal">Cancel</button>
-        </div>
+    <div class="modal-body">
+      <ul id="filelist"></ul>
+      <div id="nofiles" class="placeholder">
+        There is no appropriate file, please upload one.
+      </div>
     </div>
-    <div id="waiting" class="modal hide">
-        <div class="modal-body">
-            Please wait...
-        </div>
+    <div class="modal-footer">
+      <input type="file" id="file" multiple>
+      <button id="btn_upload" class="btn btn-primary">Upload New File</button>
+      <button class="btn" data-dismiss="modal">Cancel</button>
     </div>
-    <palette></palette>
-    <chooser></chooser>
+  </div>
+  <div id="waiting" class="modal hide">
+    <div class="modal-body">
+      Please wait...
+    </div>
+  </div>
+  <palette></palette>
+  <chooser></chooser>
 </body>
 </html>
